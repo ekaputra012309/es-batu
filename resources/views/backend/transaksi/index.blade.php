@@ -157,7 +157,8 @@
                 $('.form-row').each(function() {
                     const qty = $(this).find('.qty').val() || 0;
                     const price = parseInt($(this).find('.price').data('rawValue') || 0); // Get raw value for calculation
-                    total += qty * price;
+                    // total += qty * price;
+                    total += price;
                 });
                 $('#total').text(total.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); // Update total amount
             }

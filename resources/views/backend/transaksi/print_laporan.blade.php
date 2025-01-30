@@ -91,7 +91,8 @@
                     </td>
                     <td>
                         @foreach ($transaksi->details as $detail)
-                            Rp {{ number_format($detail->qty*$detail->harga, 0, ',', '.') }}<br>
+                            <!-- Rp {{ number_format($detail->qty*$detail->harga, 0, ',', '.') }}<br> -->
+                            Rp {{ number_format($detail->harga, 0, ',', '.') }}<br>
                         @endforeach
                     </td>
                     <td class="price">Rp {{ number_format($transaksi->total, 0, ',', '.') }}</td>

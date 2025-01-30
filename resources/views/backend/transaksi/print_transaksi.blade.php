@@ -64,7 +64,8 @@
         @foreach ($transaksi->details as $detail)
             <tr class="detail-row">
                 <td>{{ $detail->qty }} {{ $detail->satuan }} x Rp {{ number_format($detail->harga, 0, ',', '.') }}</td>
-                <td class="price">Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}</td>
+                <!-- <td class="price">Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}</td> -->
+                <td class="price">Rp {{ number_format($detail->harga, 0, ',', '.') }}</td>
             </tr>
         @endforeach
         <tr class="total-row">

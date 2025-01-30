@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
+use Carbon\Carbon;
 
 class TransaksiController extends Controller
 {
@@ -84,7 +85,8 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::create([
             'no_inv' => $no_inv,
             'total' => collect($request->details)->sum(function ($detail) {
-                return $detail['qty'] * $detail['harga'];
+                // return $detail['qty'] * $detail['harga'];
+                return $detail['harga'];
             }),
             'user_id' => $request->user_id,
         ]);
@@ -167,8 +169,8 @@ class TransaksiController extends Controller
 
     public function cetakLaporan(Request $request)
     {
-        $startDate = $request->startDate;
-        $endDate = $request->endDate;
+        $startDate = Carbon::parse($request->startDate)->startOfDay()->toDateTimeString();
+        $endDate = Carbon::parse($request->endDate)->endOfDay()->toDateTimeString();
 
         $request->validate([
             'startDate' => 'required|date',
