@@ -81,11 +81,12 @@
                                                 <div class="col-12 col-md-4">
                                                     <label for="harga">Harga:</label>
                                                     <input type="tel" class="form-control price" name="details[0][harga]" required>
+                                                    <input type="hidden" name="details[0][satuan]" value="Kg">
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <button type="button" class="btn btn-secondary w-100 mt-2" id="addDetail">Tambah Detail</button>
+                                        <button type="button" class="btn btn-secondary mt-2" id="addDetail">Tambah Detail</button>
                                     </div>
 
                                     <div class="col-md-4 text-center mt-4">
@@ -96,7 +97,7 @@
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary mt-3 w-100">Simpan Transaksi</button>
+                                <button type="submit" class="btn btn-primary mt-3">Simpan Transaksi</button>
                             </div>
                         </form>
                     </div>
@@ -165,25 +166,23 @@
             // Function to calculate total amount
             function calculateTotal() {
                 let total = 0;
-                $('.form-row').each(function() {
+                $('.detail-row, #details .row.mb-3').each(function() { // Include both static & dynamic rows
                     const qty = $(this).find('.qty').val() || 0;
-                    const price = parseInt($(this).find('.price').data('rawValue') || 0); // Get raw value for calculation
+                    const price = parseFloat($(this).find('.price').val().replace(/\./g, '')) || 0; // Convert formatted value to number
                     total += qty * price;
-                    // total += price;
                 });
                 $('#total').text(total.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); // Update total amount
             }
 
             // Function to format price input
             function formatPriceInput(input) {
-                const rawValue = input.val().replace(/\./g, ''); // Remove dots for raw value
-                const formattedValue = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Format for display
-                input.val(formattedValue); // Update input with formatted value
-                input.data('rawValue', rawValue); // Store the raw value in data attribute
+                let rawValue = input.val().replace(/\D/g, ''); // Remove non-numeric characters
+                let formattedValue = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Format with dots
+                input.val(formattedValue);
             }
 
-            // Add initial event listener for the first detail
-            $('.qty, .price').on('input', function() {
+            // Add event listener for dynamically added fields
+            $(document).on('input', '.qty, .price', function() {
                 if ($(this).hasClass('price')) {
                     formatPriceInput($(this));
                 }
@@ -209,8 +208,8 @@
                         <div class="col-12 col-md-3">
                             <label for="harga">Harga:</label>
                             <input type="tel" class="form-control price w-100" name="details[${detailIndex}][harga]" required>
+                            <input type="hidden" name="details[${detailIndex}][satuan]" value="Kg">
                         </div>
-                        <input type="hidden" name="details[${detailIndex}][satuan]" value="Kg">
                         <div class="col-12 col-md-2 text-center text-md-start">
                             <br>
                             <button type="button" class="btn btn-danger removeDetail">Hapus</button>
@@ -218,32 +217,22 @@
                     </div>`;
                 
                 $('#details').append(newDetail);
-                detailIndex++; // Increment index for next detail
-
-                // Add event listeners for new input fields
-                $('.qty:last, .price:last').on('input', function() {
-                    if ($(this).hasClass('price')) {
-                        formatPriceInput($(this));
-                    }
-                    calculateTotal();
-                });
-
-                calculateTotal(); // Recalculate total
+                detailIndex++;
+                calculateTotal();
             });
 
             $('#details').on('click', '.removeDetail', function() {
-                $(this).closest('.detail-row').remove(); // Remove the parent row
-                calculateTotal(); // Recalculate total after removal
+                $(this).closest('.detail-row').remove();
+                calculateTotal();
             });
 
-            // Form submission handler
             $('form').on('submit', function() {
                 $('.price').each(function() {
-                    const rawValue = $(this).data('rawValue');
-                    $(this).val(rawValue); // Set the input value to the raw value for submission
+                    $(this).val($(this).val().replace(/\./g, '')); // Remove formatting before submission
                 });
             });
         });
+
     </script>
 </div>
 @endsection

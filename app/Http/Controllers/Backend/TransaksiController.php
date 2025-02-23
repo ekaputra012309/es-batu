@@ -70,6 +70,7 @@ class TransaksiController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             // 'customer' => 'string|max:255',
             'user_id' => 'required|exists:users,id',
@@ -78,7 +79,7 @@ class TransaksiController extends Controller
             'details.*.qty' => 'required|integer|min:1',
             'details.*.harga' => 'required|numeric|min:0',
             'details.*.satuan' => 'required|string|max:255',
-        ]);
+        ]);        
 
         // Generate the no_inv
         $no_inv = $this->generateInvoiceNumber($request->user_id);
