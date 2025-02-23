@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('table_transaksis', function (Blueprint $table) {
             $table->id();
             $table->string('no_inv')->unique(); // Invoice number
+            $table->string('customer')->nullable();
             $table->decimal('total', 10, 2); // Total amount
             $table->unsignedBigInteger('user_id'); // User ID
             $table->timestamps();
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('table_transaksi_id'); // Foreign key referencing the header table
             $table->string('no_inv'); // Invoice number
+            $table->integer('berat'); // Quantity
             $table->integer('qty'); // Quantity
             $table->decimal('harga', 10, 2); // Price
             $table->string('satuan'); // Satuan

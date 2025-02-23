@@ -71,8 +71,10 @@ class TransaksiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            // 'customer' => 'string|max:255',
             'user_id' => 'required|exists:users,id',
             'details' => 'required|array',
+            'details.*.berat' => 'required|integer|min:1',
             'details.*.qty' => 'required|integer|min:1',
             'details.*.harga' => 'required|numeric|min:0',
             'details.*.satuan' => 'required|string|max:255',
@@ -85,10 +87,11 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::create([
             'no_inv' => $no_inv,
             'total' => collect($request->details)->sum(function ($detail) {
-                // return $detail['qty'] * $detail['harga'];
-                return $detail['harga'];
+                return $detail['qty'] * $detail['harga'];
+                // return $detail['harga'];
             }),
             'user_id' => $request->user_id,
+            'customer' => $request->customer ?? '',
         ]);
 
         // Create transaction details
@@ -96,6 +99,7 @@ class TransaksiController extends Controller
             TransaksiDetail::create([
                 'table_transaksi_id' => $transaksi->id,
                 'no_inv' => $no_inv,
+                'berat' => $detail['berat'],
                 'qty' => $detail['qty'],
                 'harga' => $detail['harga'],
                 'satuan' => $detail['satuan'],

@@ -13,6 +13,7 @@ class Transaksi extends Model
 
     protected $fillable = [
         'no_inv',
+        'customer',
         'total',
         'user_id',
     ];

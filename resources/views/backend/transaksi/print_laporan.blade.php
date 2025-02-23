@@ -61,6 +61,7 @@
                 <th>No</th>
                 <th>Petugas</th>
                 <th>No Invoice</th>
+                <th>Customer</th>
                 <th>Tanggal Transaksi</th>
                 <th>Qty</th>
                 <th>Harga</th>
@@ -78,10 +79,11 @@
                     <td style="text-align: center;">{{ ++$rowNumber }}</td>
                     <td>{{ $transaksi->user->name }}</td>
                     <td>{{ $transaksi->no_inv }}</td>
+                    <td>{{ $transaksi->customer }}</td>
                     <td>{{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d F Y, H:i') }}</td>
                     <td>
                         @foreach ($transaksi->details as $detail)
-                            {{ $detail->qty }}<br>
+                            {{ $detail->berat }} kg @ {{ $detail->qty }}pcs<br>
                         @endforeach
                     </td>
                     <td>
@@ -91,8 +93,8 @@
                     </td>
                     <td>
                         @foreach ($transaksi->details as $detail)
-                            <!-- Rp {{ number_format($detail->qty*$detail->harga, 0, ',', '.') }}<br> -->
-                            Rp {{ number_format($detail->harga, 0, ',', '.') }}<br>
+                            Rp {{ number_format($detail->qty*$detail->harga, 0, ',', '.') }}<br>
+                            <!-- Rp {{ number_format($detail->harga, 0, ',', '.') }}<br> -->
                         @endforeach
                     </td>
                     <td class="price">Rp {{ number_format($transaksi->total, 0, ',', '.') }}</td>
@@ -104,7 +106,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="7"><b>Grand Total</b></td>
+                <td colspan="8"><b>Grand Total</b></td>
                 <td class="price"><b>Rp {{ number_format($grandTotal, 0, ',', '.') }}</b></td>
             </tr>
         </tfoot>

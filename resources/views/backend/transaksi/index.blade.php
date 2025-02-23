@@ -29,7 +29,7 @@
                         <div class="card-header">
                             <h3 class="card-title">Tambah Transaksi</h3>
                             <div class="card-tools">
-                                @if(session('print_transaction_id') != 0)
+                                <!-- @if(session('print_transaction_id') != 0)
                                     <button id="printButton" onclick="openTab()" class="btn btn-primary btn-sm d-none">
                                         <i class="fas fa-print"></i> Print Data
                                     </button>
@@ -45,7 +45,7 @@
                                             document.getElementById('printButton').click();
                                         }, 3000);
                                     </script>
-                                @endif
+                                @endif -->
 
                             </div>
                         </div>
@@ -59,33 +59,44 @@
                                 <div class="row">
                                     <div class="col-md-8">
                                         <h4 class="mb-4">Transaksi Detail</h4>
+                                        <div class="form-group">
+                                            <label for="customer">Customer:</label>
+                                            <input type="text" class="form-control" name="customer">
+                                        </div>
                                         <div id="details">
-                                            <div class="form-row mb-3">
-                                                <div class="col">
-                                                    <label for="qty">Kuantiti:</label>
+                                            <div class="row mb-3 align-items-end">
+                                                <div class="col-12 col-md-4">
+                                                    <label for="berat">Berat (KG):</label>
+                                                    <select name="details[0][berat]" class="form-control" required>
+                                                        <option value="">Pilih Varian</option>
+                                                        <option value="5">5 Kg</option>
+                                                        <option value="10">10 Kg</option>
+                                                        <option value="20">20 Kg</option> 
+                                                    </select>
+                                                </div>
+                                                <div class="col-12 col-md-4">
+                                                    <label for="qty">Kuantiti (PCS):</label>
                                                     <input type="number" class="form-control qty" name="details[0][qty]" required>
                                                 </div>
-                                                <div class="col">
+                                                <div class="col-12 col-md-4">
                                                     <label for="harga">Harga:</label>
                                                     <input type="tel" class="form-control price" name="details[0][harga]" required>
                                                 </div>
-
-                                                <input type="hidden" name="details[0][satuan]" value="Kg">
                                             </div>
                                         </div>
 
-                                        <button type="button" class="btn btn-secondary" id="addDetail">Add Detail</button>
+                                        <button type="button" class="btn btn-secondary w-100 mt-2" id="addDetail">Tambah Detail</button>
                                     </div>
-                                    
-                                    <div class="col-md-4">
+
+                                    <div class="col-md-4 text-center mt-4">
                                         <h3 class="mb-4">Total Bayar</h3>
-                                        <div id="totalAmount" class="p-3">
+                                        <div id="totalAmount" class="p-3 bg-light rounded">
                                             Rp <br> <span id="total" style="font-size: 40pt">0.00</span>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <button type="submit" class="btn btn-primary mt-3">Simpan Transaksi</button>
+
+                                <button type="submit" class="btn btn-primary mt-3 w-100">Simpan Transaksi</button>
                             </div>
                         </form>
                     </div>
@@ -157,8 +168,8 @@
                 $('.form-row').each(function() {
                     const qty = $(this).find('.qty').val() || 0;
                     const price = parseInt($(this).find('.price').data('rawValue') || 0); // Get raw value for calculation
-                    // total += qty * price;
-                    total += price;
+                    total += qty * price;
+                    // total += price;
                 });
                 $('#total').text(total.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); // Update total amount
             }
@@ -181,25 +192,35 @@
 
             $('#addDetail').on('click', function() {
                 const newDetail = `
-                    <div class="form-row mb-3 detail-row">
-                        <div class="col">
-                            <label for="qty">Kuantiti:</label>
-                            <input type="number" class="form-control qty" name="details[${detailIndex}][qty]" required>
+                    <div class="row g-3 detail-row">
+                        <div class="col-12 col-md-4">
+                            <label for="berat">Berat (KG):</label>
+                            <select name="details[${detailIndex}][berat]" class="form-control w-100" required>
+                                <option value="">Pilih Varian</option>
+                                <option value="5">5 Kg</option>
+                                <option value="10">10 Kg</option>
+                                <option value="20">20 Kg</option>
+                            </select>
                         </div>
-                        <div class="col">
+                        <div class="col-12 col-md-3">
+                            <label for="qty">Kuantiti:</label>
+                            <input type="number" class="form-control qty w-100" name="details[${detailIndex}][qty]" required>
+                        </div>
+                        <div class="col-12 col-md-3">
                             <label for="harga">Harga:</label>
-                            <input type="tel" class="form-control price" name="details[${detailIndex}][harga]" required>
+                            <input type="tel" class="form-control price w-100" name="details[${detailIndex}][harga]" required>
                         </div>
                         <input type="hidden" name="details[${detailIndex}][satuan]" value="Kg">
-                        <div class="col-auto">
+                        <div class="col-12 col-md-2 text-center text-md-start">
                             <br>
-                            <button type="button" class="btn btn-danger removeDetail">Remove</button>
+                            <button type="button" class="btn btn-danger removeDetail">Hapus</button>
                         </div>
                     </div>`;
+                
                 $('#details').append(newDetail);
-                detailIndex++; // Increment the index for the next detail
+                detailIndex++; // Increment index for next detail
 
-                // Add event listener for new fields
+                // Add event listeners for new input fields
                 $('.qty:last, .price:last').on('input', function() {
                     if ($(this).hasClass('price')) {
                         formatPriceInput($(this));

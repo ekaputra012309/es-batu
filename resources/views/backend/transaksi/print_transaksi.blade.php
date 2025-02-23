@@ -57,15 +57,19 @@
             <th>User</th>
             <td>: {{ $transaksi->user->name }}</td>
         </tr>
+        <tr>
+            <th>Customer</th>
+            <td>: {{ $transaksi->customer ?? '' }}</td>
+        </tr>
     </table>
 
     <h3>Detail Transaksi</h3>
     <table>
         @foreach ($transaksi->details as $detail)
             <tr class="detail-row">
-                <td>{{ $detail->qty }} {{ $detail->satuan }} x Rp {{ number_format($detail->harga, 0, ',', '.') }}</td>
-                <!-- <td class="price">Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}</td> -->
-                <td class="price">Rp {{ number_format($detail->harga, 0, ',', '.') }}</td>
+                <td>{{ $detail->berat }} {{ $detail->satuan }} ( {{ $detail->qty }} pcs x Rp {{ number_format($detail->harga, 0, ',', '.') }} )</td>
+                <td class="price">Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}</td>
+                <!-- <td class="price">Rp {{ number_format($detail->harga, 0, ',', '.') }}</td> -->
             </tr>
         @endforeach
         <tr class="total-row">
