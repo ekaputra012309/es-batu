@@ -63,7 +63,8 @@
             <div class="col-lg-4 col-12">
                 <div id="auth-left">
                     <div class="auth-logo">
-                        <img src="{{asset('backend/img/logo.png')}}" alt="Logo" style="height: 100px">
+                        <img src="{{ asset($companyProfile->image) }}" height="100" alt="Company Logo">
+                        <!-- <img src="{{asset('backend/img/logo.png')}}" alt="Logo" style="height: 100px"> -->
                         <!-- <h2>DNA KONSULTANT</h2> -->
                     </div>
 

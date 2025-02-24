@@ -22,6 +22,9 @@ Route::post('/clear-session', [TransaksiController::class, 'clearSession'])->nam
 Route::get('/transaksi/laporan', [TransaksiController::class, 'laporan'])->name('transaksi.laporan');
 Route::get('/transaksi/laporan/cetak', [TransaksiController::class, 'cetakLaporan'])->name('transaksi.laporan.cetak');
 
+Route::get('/company-profile', [Backend::class, 'editCompany'])->name('companyProfile');
+Route::put('/company-profile/update', [Backend::class, 'updateCompany'])->name('companyProfile.update');
+
 Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 

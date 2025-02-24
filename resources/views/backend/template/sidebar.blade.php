@@ -1,10 +1,14 @@
 @php
     $role = App\Models\Privilage::getRoleKodeForAuthenticatedUser();
+    $companyProfile = App\Models\CompanyProfile::first();
 @endphp
 
 <aside class="main-sidebar sidebar-light-primary elevation-4">
     <a href="{{ route('dashboard') }}" class="brand-link">
-        <img src="{{ asset('backend/img/logo.jpeg') }}" alt="AdminLTE Logo" style="width: 75px;"> {{ config('app.name') }}
+        @if($companyProfile->logo)
+            <img src="{{ asset($companyProfile->image) }}" alt="AdminLTE Logo" style="width: 75px;">
+        @endif
+        {{ $companyProfile->name }}
     </a>
     <div class="sidebar">
         <br>
@@ -75,6 +79,11 @@
                         <li class="nav-item">
                             <a href="{{ route('user.index') }}" class="nav-link {{ request()->routeIs('user.index') ? 'active' : '' }}">
                                 <p>Manage User</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('companyProfile') }}" class="nav-link {{ request()->routeIs('companyProfile') ? 'active' : '' }}">
+                                <p>Perusahaan</p>
                             </a>
                         </li>
                     </ul>
