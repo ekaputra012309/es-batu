@@ -177,11 +177,13 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <strong>{{ $transaksi->no_inv }}</strong>
+                                                    {{ $transaksi->no_inv }}
                                                     <br>
-                                                    <span class="text-muted">
-                                                        {{ $transaksi->customer }}
-                                                    </span>
+                                                    <strong>
+                                                        <h4>
+                                                            {{ $transaksi->customer }}
+                                                        </h4>
+                                                    </strong>
                                                 </td>
                                                 <td>
                                                     <i class="fas fa-calendar small"></i>

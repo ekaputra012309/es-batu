@@ -24,7 +24,10 @@
 
                     <div class="form-group">
                         <label for="nominal">Nominal Pembayaran</label>
-                        <input type="number" name="nominal" class="form-control" required max="{{ $sisa }}">
+                        <input type="text" name="nominal_display" class="form-control"
+                            id="nominalFormatted{{ $transaksi->id }}" required>
+                        <input type="hidden" name="nominal" id="nominalRaw{{ $transaksi->id }}">
+                        {{-- <input type="number" name="nominal" class="form-control" required max="{{ $sisa }}"> --}}
                         <small class="text-muted">Maksimum: Rp
                             {{ number_format($sisa, 2, ',', '.') }}</small>
                     </div>
@@ -37,3 +40,23 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalId = {{ $transaksi->id }};
+        const formattedInput = document.getElementById(`nominalFormatted${modalId}`);
+        const rawInput = document.getElementById(`nominalRaw${modalId}`);
+
+        if (formattedInput && rawInput) {
+            formattedInput.addEventListener('input', function() {
+                let value = this.value.replace(/\./g, '').replace(/[^\d]/g, '');
+                if (!value) value = '0';
+
+                rawInput.value = value;
+
+                // Format with dot as thousand separator
+                this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            });
+        }
+    });
+</script>
