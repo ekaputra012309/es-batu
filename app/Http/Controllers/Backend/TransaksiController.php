@@ -8,6 +8,7 @@ use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Bayar;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
@@ -35,7 +36,7 @@ class TransaksiController extends Controller
 
     public function index()
     {
-        $transaksi = Transaksi::with('user', 'details')
+        $transaksi = Transaksi::with('user', 'details', 'bayar')
                     ->orderBy('created_at', 'desc')
                     ->get();
         $userId = auth()->user()->id;
@@ -70,32 +71,68 @@ class TransaksiController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $request->validate([
-            // 'customer' => 'string|max:255',
             'user_id' => 'required|exists:users,id',
             'details' => 'required|array',
             'details.*.berat' => 'required|integer|min:1',
             'details.*.qty' => 'required|integer|min:1',
             'details.*.harga' => 'required|numeric|min:0',
             'details.*.satuan' => 'required|string|max:255',
-        ]);        
+            'status' => 'required|in:0,1',
+            'nominal' => 'nullable|numeric|min:0',
+        ]);
+        // dd($request->all());
+        
+        $total = collect($request->details)->sum(function ($detail) {
+            return $detail['qty'] * $detail['harga'];
+        });
 
-        // Generate the no_inv
+        // ✅ 1. ADD ITEM TO EXISTING TRANSAKSI
+        if ($request->filled('transaksi_id')) {
+            $transaksi = Transaksi::findOrFail($request->transaksi_id);
+
+            // Add new detail items
+            foreach ($request->details as $detail) {
+                TransaksiDetail::create([
+                    'table_transaksi_id' => $transaksi->id,
+                    'no_inv' => $transaksi->no_inv,
+                    'berat' => $detail['berat'],
+                    'qty' => $detail['qty'],
+                    'harga' => $detail['harga'],
+                    'satuan' => $detail['satuan'],
+                    'user_id' => $request->user_id,
+                ]);
+            }
+
+            // Add payment if status is Lunas (0)
+            if ($request->status == '0' && $request->filled('nominal')) {
+                Bayar::create([
+                    'table_transaksi_id' => $transaksi->id,
+                    'nominal' => $request->nominal,
+                    'user_id' => $request->user_id,
+                ]);
+            }
+
+            // Update total and status
+            $transaksi->update([
+                'total' => $transaksi->total + $total,
+                'status' => $request->status,
+            ]);
+
+            Alert::success('Success', 'Item berhasil ditambahkan ke transaksi.')->autoClose(2000);
+            return redirect()->route('transaksi.index');
+        }
+
         $no_inv = $this->generateInvoiceNumber($request->user_id);
 
-        // Create the transaction
         $transaksi = Transaksi::create([
             'no_inv' => $no_inv,
-            'total' => collect($request->details)->sum(function ($detail) {
-                return $detail['qty'] * $detail['harga'];
-                // return $detail['harga'];
-            }),
+            'total' => $total,
             'user_id' => $request->user_id,
             'customer' => $request->customer ?? '',
+            'status' => $request->status,
         ]);
 
-        // Create transaction details
         foreach ($request->details as $detail) {
             TransaksiDetail::create([
                 'table_transaksi_id' => $transaksi->id,
@@ -107,10 +144,17 @@ class TransaksiController extends Controller
                 'user_id' => $request->user_id,
             ]);
         }
+
+        if ($request->status == '0') {
+            Bayar::create([
+                'table_transaksi_id' => $transaksi->id,
+                'nominal' => $request->nominal,
+                'user_id' => $request->user_id,
+            ]);
+        }        
+
         Alert::success('Success', 'Transaksi created successfully.')->autoClose(2000);
-        // Store the transaction ID in session to trigger print
         session()->flash('print_transaction_id', $transaksi->id);
-        // dd(session()->all());
         return redirect()->route('transaksi.index');
     }
 
@@ -142,10 +186,18 @@ class TransaksiController extends Controller
 
     public function destroy($id)
     {
-        $transaksi = transaksi::findOrFail($id);
-        $transaksi->delete();
-        Alert::success('Success', 'transaksi deleted successfully.');
+        $transaksi = Transaksi::findOrFail($id);
 
+        // Delete related TransaksiDetail
+        $transaksi->details()->delete(); // Assuming the relation name is `details`
+
+        // Delete related Bayar
+        Bayar::where('table_transaksi_id', $transaksi->id)->delete();
+
+        // Finally, delete the transaksi
+        $transaksi->delete();
+
+        Alert::success('Success', 'Transaksi deleted successfully.');
         return redirect()->route('transaksi.index');
     }
 
@@ -201,6 +253,40 @@ class TransaksiController extends Controller
         $pdf = FacadePdf::loadView('backend.transaksi.print_laporan', $data);
         $pdf->setPaper('A4', 'portrait');
         return $pdf->stream('Laporan-'.$startDate.'-'.$endDate.'.pdf');
+    }
+
+    public function cicil(Request $request, $id)
+    {
+        $transaksi = Transaksi::with('bayar')->findOrFail($id);
+
+        $request->validate([
+            'nominal' => 'required|numeric|min:1'
+        ]);
+
+        $totalBayar = $transaksi->bayar->sum('nominal');
+        // $totalBayar = $transaksi->bayars ? $transaksi->bayars->sum('nominal') : 0;
+
+        $sisa = $transaksi->total - $totalBayar;
+
+        if ($request->nominal > $sisa) {
+            return back()->withErrors(['nominal' => 'Nominal melebihi sisa pembayaran']);
+        }
+
+        Bayar::create([
+            'table_transaksi_id' => $transaksi->id,
+            'nominal' => $request->nominal,
+            'user_id' => auth()->id(),
+        ]);
+
+        // Update status if fully paid
+        $transaksi->refresh(); // refresh model
+        if ($transaksi->bayar->sum('nominal') >= $transaksi->total) {
+            $transaksi->status = "0"; // Lunas
+            $transaksi->save();
+        }
+
+        Alert::success('Berhasil', 'Pembayaran cicilan berhasil ditambahkan');
+        return redirect()->route('transaksi.index');
     }
 
 }

@@ -32,6 +32,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/{id}/reset-password', [UserController::class, 'resetPassword'])->name('user.resetPassword');
     Route::resource('privilage', PrivilageController::class); //privilage
     Route::resource('transaksi', TransaksiController::class); //transaksi
+    
+    Route::post('/transaksi/{id}/cicil', [TransaksiController::class, 'cicil'])->name('transaksi.cicil');
+
 });
 
 require __DIR__.'/auth.php';
