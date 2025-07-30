@@ -17,6 +17,7 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
+                            <th>Tanggal</th>
                             <th>Berat</th>
                             <th>Qty</th>
                             <th>Harga</th>
@@ -26,6 +27,9 @@
                     <tbody>
                         @foreach ($transaksi->details as $detail)
                             <tr>
+                                <td>
+                                    {{ \Carbon\Carbon::parse($detail->created_at)->translatedFormat('d M Y, H:i') }}
+                                </td>
                                 <td>{{ $detail->berat }} {{ $detail->satuan }}</td>
                                 <td>{{ $detail->qty }}</td>
                                 <td>Rp {{ number_format($detail->harga, 0, ',', '.') }}</td>
