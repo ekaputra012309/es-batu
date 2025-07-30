@@ -15,12 +15,23 @@ class Transaksi extends Model
         'no_inv',
         'customer',
         'total',
+        'status',
         'user_id',
     ];
 
     public function details()
     {
         return $this->hasMany(TransaksiDetail::class, 'table_transaksi_id');
+    }
+
+    public function bayar()
+    {
+        return $this->hasMany(Bayar::class, 'table_transaksi_id');
+    }
+
+    public function lastBayar()
+    {
+        return $this->hasOne(Bayar::class, 'table_transaksi_id')->latestOfMany();
     }
 
     public function user()

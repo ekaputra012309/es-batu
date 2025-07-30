@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('no_inv')->unique(); // Invoice number
             $table->string('customer')->nullable();
             $table->decimal('total', 10, 2); // Total amount
+            $table->enum('status', [0, 1])->default(0); //0 = Lunas , 1 = Belum Lunas
             $table->unsignedBigInteger('user_id'); // User ID
             $table->timestamps();
 
