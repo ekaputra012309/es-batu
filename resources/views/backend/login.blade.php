@@ -8,7 +8,8 @@
     <link rel="shortcut icon" href={{ asset('backend/img/logo.ico') }} type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="https://adminlte.io/themes/v3/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('backend/css/adminlte.min.css?v=3.2.0') }}">
 
@@ -62,10 +63,10 @@
         <div class="row h-100">
             <div class="col-lg-4 col-12">
                 <div id="auth-left">
-                    <div class="auth-logo">
-                        <img src="{{ asset($companyProfile->image) }}" height="100" alt="Company Logo">
-                        <!-- <img src="{{asset('backend/img/logo.png')}}" alt="Logo" style="height: 100px"> -->
-                        <!-- <h2>DNA KONSULTANT</h2> -->
+                    <div class="auth-logo mb-2 d-flex align-items-center">
+                        <img src="{{ asset($companyProfile->image) }}" height="50" alt="Company Logo"
+                            class="mr-2 d-inline-block align-middle">
+                        <h2 class="mb-0 text-uppercase d-inline-block align-middle">{{ $companyProfile->name }}</h2>
                     </div>
 
                     <form action="{{ route('login') }}" method="POST">
@@ -79,7 +80,8 @@
                             </div>
                         </div>
                         <div class="input-group mb-3">
-                            <input type="password" class="form-control" placeholder="Password" id="password" name="password" required>
+                            <input type="password" class="form-control" placeholder="Password" id="password"
+                                name="password" required>
                             <div class="input-group-append">
                                 <div class="input-group-text">
                                     <span class="fas fa-lock"></span>
