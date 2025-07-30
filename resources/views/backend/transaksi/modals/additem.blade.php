@@ -22,8 +22,10 @@
                             <div class="col-md-4">
                                 <label>Berat</label>
                                 <select name="details[0][berat]" class="form-control" required>
+                                    <option value="">Pilih Varian</option>
                                     <option value="5">5 Kg</option>
                                     <option value="10">10 Kg</option>
+                                    <option value="20">20 Kg</option>
                                 </select>
                             </div>
                             <div class="col-md-4">

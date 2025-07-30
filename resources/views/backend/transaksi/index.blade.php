@@ -153,12 +153,14 @@
                                                             Delete
                                                         </a>
                                                     @endif
-                                                    <a class="btn btn-xs btn-info"
-                                                        href="{{ route('transaksi.show', $transaksi->id) }}"
-                                                        target="_blank">
-                                                        <i class="fas fa-search"></i>
-                                                        Detail
-                                                    </a>
+                                                    <button class="btn btn-xs btn-info" data-toggle="modal"
+                                                        data-target="#detailModal{{ $transaksi->id }}">
+                                                        <i class="fas fa-search"></i> Detail
+                                                    </button>
+
+                                                    @include('backend.transaksi.modals.detail', [
+                                                        'transaksi' => $transaksi,
+                                                    ])
 
                                                     {{-- Button on right, only show if not lunas --}}
                                                     @if ($transaksi->status != 0)

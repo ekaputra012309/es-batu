@@ -203,7 +203,7 @@ class TransaksiController extends Controller
 
     public function print($id)
     {
-        $transaksi = Transaksi::with('details', 'user')->findOrFail($id);
+        $transaksi = Transaksi::with('details', 'user', 'bayar')->findOrFail($id);
         $pdf = FacadePdf::loadView('backend.transaksi.print_transaksi', compact('transaksi'));
         // $pdf->setPaper('A7', 'portrait');
         $pdf->setPaper([0, 0, 219, 620], 'portrait');
