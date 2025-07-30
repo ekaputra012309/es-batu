@@ -28,9 +28,10 @@ class Backend extends Controller
         $monthlyStart = $today->copy()->startOfMonth();
         $yearlyStart = $today->copy()->startOfYear();
         
-        $todayIncome = Transaksi::whereDate('created_at', $today)->sum('total');
-        $monthlyIncome = Transaksi::whereBetween('created_at', [$monthlyStart, $today->endOfDay()])->sum('total');
-        $yearlyIncome = Transaksi::whereBetween('created_at', [$yearlyStart, $today->endOfDay()])->sum('total');
+        // Real income from 'bayars' table (actual payments)
+        $todayIncome = Bayar::whereDate('created_at', $today)->sum('nominal');
+        $monthlyIncome = Bayar::whereBetween('created_at', [$monthlyStart, $today->endOfDay()])->sum('nominal');
+        $yearlyIncome = Bayar::whereBetween('created_at', [$yearlyStart, $today->endOfDay()])->sum('nominal');
 
         $data = [
             'title' => 'Dashboard | ',
@@ -41,7 +42,6 @@ class Backend extends Controller
         
         return view('backend.dashboard', $data);
     }
-
 
     public function profile(Request $request)
     {
