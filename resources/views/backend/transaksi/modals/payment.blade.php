@@ -17,8 +17,8 @@
                     <option value="1">Cicil</option>
                 </select>
 
-                <label class="mt-3" for="nominal">Nominal:</label>
-                <input type="text" class="form-control" name="nominal" id="nominal" required
+                <label class="mt-3 d-none" for="nominal">Nominal:</label>
+                <input type="hidden" class="form-control" name="nominal" id="nominal" required
                     placeholder="Masukkan nominal">
             </div>
             <div class="modal-footer">
