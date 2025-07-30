@@ -234,7 +234,7 @@ class TransaksiController extends Controller
             'endDate' => 'required|date|after_or_equal:startDate',
         ]);
     
-        $transaksiQuery = Transaksi::with('user', 'details')->orderBy('created_at', 'desc');
+        $transaksiQuery = Transaksi::with('user', 'details', 'bayar')->orderBy('created_at', 'desc');
 
         // Add date filtering only if both dates are provided
         if ($startDate && $endDate) {
@@ -251,7 +251,7 @@ class TransaksiController extends Controller
         );        
         // dd($data);
         $pdf = FacadePdf::loadView('backend.transaksi.print_laporan', $data);
-        $pdf->setPaper('A4', 'portrait');
+        $pdf->setPaper('A4', 'landscape');
         return $pdf->stream('Laporan-'.$startDate.'-'.$endDate.'.pdf');
     }
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <link rel="shortcut icon" href="{{ asset('backend/img/logo.ico') }}" type="image/x-icon">
     <title>{{ $title . config('app.name') }}</title>
@@ -11,47 +12,66 @@
             padding: 0;
             font-size: 11px;
         }
+
         h3 {
             text-align: center;
         }
+
         p {
             text-align: center;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 0;
         }
+
         th {
             text-align: center;
             padding: 5px;
             line-height: 1.2;
-            border: 1px solid #000; /* Border for all cells */
+            border: 1px solid #000;
+            /* Border for all cells */
         }
+
         td {
             text-align: right;
             vertical-align: top;
             padding: 5px;
             line-height: 1.2;
-            border: 1px solid #000; /* Border for all cells */
+            border: 1px solid #000;
+            /* Border for all cells */
         }
+
         .footer {
             text-align: center;
         }
+
         .price {
             text-align: right;
         }
+
         .total-row {
             font-weight: bold;
             text-align: right;
         }
+
+        .text-danger {
+            color: red;
+        }
+
+        .text-success {
+            color: green;
+        }
     </style>
 </head>
+
 <body>
     <h3>{{ config('app.name') }}</h3>
     <p>
-        Laporan dari tanggal 
-        {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} s/d 
+        Laporan dari tanggal
+        {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} s/d
         {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
     </p>
 
@@ -66,6 +86,8 @@
                 <th>Qty</th>
                 <th>Harga</th>
                 <th>Total</th>
+                <th>Status</th> {{-- Add this --}}
+                <th>Kurang Bayar</th> {{-- Add this --}}
                 <th>Sub Total</th>
             </tr>
         </thead>
@@ -93,23 +115,57 @@
                     </td>
                     <td>
                         @foreach ($transaksi->details as $detail)
-                            Rp {{ number_format($detail->qty*$detail->harga, 0, ',', '.') }}<br>
-                            <!-- Rp {{ number_format($detail->harga, 0, ',', '.') }}<br> -->
+                            Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}<br>
                         @endforeach
                     </td>
-                    <td class="price">Rp {{ number_format($transaksi->total, 0, ',', '.') }}</td>
+
+                    @php
+                        $totalBayar = $transaksi->bayar ? $transaksi->bayar->sum('nominal') : 0;
+                        $sisa = $transaksi->total - $totalBayar;
+                        $status = $transaksi->status == 0 ? 'Lunas' : 'Belum Lunas';
+                    @endphp
+                    <td style="text-align: center;"
+                        class="{{ $transaksi->status != 0 ? 'text-danger' : 'text-success' }}">
+                        {{ $status }}
+                    </td>
+
+                    <td class="price">
+                        @if ($transaksi->status != 0)
+                            Rp {{ number_format($sisa, 0, ',', '.') }}
+                        @else
+                            -
+                        @endif
+                    </td>
+
+                    <td class="price">Rp {{ number_format($transaksi->total - $sisa, 0, ',', '.') }}</td>
                 </tr>
+
                 @php
                     $grandTotal += $transaksi->total; // Sum total for the invoice
                 @endphp
             @endforeach
         </tbody>
         <tfoot>
+            @php
+                $grandTotal = 0;
+                $totalKurangBayar = 0;
+                foreach ($datatransaksi as $transaksi) {
+                    $totalBayar = $transaksi->bayar ? $transaksi->bayar->sum('nominal') : 0;
+                    $sisa = $transaksi->total - $totalBayar;
+                    $grandTotal += $transaksi->total;
+                    $totalKurangBayar += $sisa;
+                }
+                $totalPaid = $grandTotal - $totalKurangBayar;
+            @endphp
             <tr>
-                <td colspan="8"><b>Grand Total</b></td>
+                <td colspan="7"></td>
                 <td class="price"><b>Rp {{ number_format($grandTotal, 0, ',', '.') }}</b></td>
+                <td></td>
+                <td class="price text-danger"><b>Rp {{ number_format($totalKurangBayar, 0, ',', '.') }}</b></td>
+                <td class="price text-success"><b>Rp {{ number_format($totalPaid, 0, ',', '.') }}</b></td>
             </tr>
         </tfoot>
     </table>
 </body>
+
 </html>
