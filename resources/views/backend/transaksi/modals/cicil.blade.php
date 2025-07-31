@@ -26,7 +26,11 @@
                         <label for="nominal">Nominal Pembayaran</label>
                         <input type="text" name="nominal_display" class="form-control"
                             id="nominalFormatted{{ $transaksi->id }}" required>
-                        <input type="hidden" name="nominal" id="nominalRaw{{ $transaksi->id }}">
+                        <input type="hidden" name="nominal" id="nominalRaw{{ $transaksi->id }}"
+                            data-sisa="{{ $sisa }}">
+                        <div class="invalid-feedback" id="errorNominal{{ $transaksi->id }}" style="display: none;">
+                            Nominal melebihi sisa pembayaran
+                        </div>
                         {{-- <input type="number" name="nominal" class="form-control" required max="{{ $sisa }}"> --}}
                         <small class="text-muted">Maksimum: Rp
                             {{ number_format($sisa, 2, ',', '.') }}</small>
@@ -58,5 +62,37 @@
                 this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             });
         }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalId = {{ $transaksi->id }};
+        const formattedInput = document.getElementById(`nominalFormatted${modalId}`);
+        const rawInput = document.getElementById(`nominalRaw${modalId}`);
+        const errorDiv = document.getElementById(`errorNominal${modalId}`);
+        const form = document.querySelector(`#cicilModal{{ $transaksi->id }} form`);
+
+        if (formattedInput && rawInput) {
+            formattedInput.addEventListener('input', function() {
+                let value = this.value.replace(/\./g, '').replace(/[^\d]/g, '');
+                if (!value) value = '0';
+                rawInput.value = value;
+                this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                errorDiv.style.display = 'none'; // hide on new input
+                rawInput.classList.remove('is-invalid');
+            });
+        }
+
+        form?.addEventListener('submit', function(e) {
+            const sisa = parseInt(rawInput.dataset.sisa);
+            const nominal = parseInt(rawInput.value || '0');
+
+            if (nominal > sisa) {
+                e.preventDefault();
+                rawInput.classList.add('is-invalid');
+                errorDiv.style.display = 'block';
+            }
+        });
     });
 </script>

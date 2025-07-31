@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Bayar;
+use App\Models\Transaksi;
 use App\Models\PermintaanModel;
 use App\Models\CompanyProfile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\Transaksi;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class Backend extends Controller
@@ -33,11 +34,17 @@ class Backend extends Controller
         $monthlyIncome = Bayar::whereBetween('created_at', [$monthlyStart, $today->endOfDay()])->sum('nominal');
         $yearlyIncome = Bayar::whereBetween('created_at', [$yearlyStart, $today->endOfDay()])->sum('nominal');
 
+        $transaksi = Transaksi::with('user', 'details', 'bayar')
+                    ->where('status', '1')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
         $data = [
             'title' => 'Dashboard | ',
             'todayIncome' => $todayIncome,
             'monthlyIncome' => $monthlyIncome,
             'yearlyIncome' => $yearlyIncome,
+            'datatransaksi' => $transaksi,
         ];
         
         return view('backend.dashboard', $data);

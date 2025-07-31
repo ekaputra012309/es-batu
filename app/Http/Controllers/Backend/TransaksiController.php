@@ -14,6 +14,8 @@ use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use Carbon\Carbon;
 
+use Illuminate\Support\Facades\Route;
+
 class TransaksiController extends Controller
 {
     protected function generateInvoiceNumber($userId)
@@ -71,6 +73,9 @@ class TransaksiController extends Controller
 
     public function store(Request $request)
     {
+        $previousUrl = url()->previous();
+        $previousRoute = app('router')->getRoutes()->match(Request::create($previousUrl))->getName();
+
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'details' => 'required|array',
@@ -120,6 +125,9 @@ class TransaksiController extends Controller
             ]);
 
             Alert::success('Success', 'Item berhasil ditambahkan ke transaksi.')->autoClose(2000);
+            if ($previousRoute === 'dashboard') {
+                return redirect()->route('dashboard');
+            }
             return redirect()->route('transaksi.index');
         }
 
@@ -155,6 +163,9 @@ class TransaksiController extends Controller
 
         Alert::success('Success', 'Transaksi created successfully.')->autoClose(2000);
         session()->flash('print_transaction_id', $transaksi->id);
+        if ($previousRoute === 'dashboard') {
+            return redirect()->route('dashboard');
+        }
         return redirect()->route('transaksi.index');
     }
 
@@ -286,6 +297,11 @@ class TransaksiController extends Controller
         }
 
         Alert::success('Berhasil', 'Pembayaran cicilan berhasil ditambahkan');
+        $previousUrl = url()->previous();
+        $previousRoute = app('router')->getRoutes()->match(Request::create($previousUrl))->getName();
+        if ($previousRoute === 'dashboard') {
+            return redirect()->route('dashboard');
+        }
         return redirect()->route('transaksi.index');
     }
 
