@@ -75,97 +75,136 @@
         {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
     </p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Petugas</th>
-                <th>No Invoice</th>
-                <th>Customer</th>
-                <th>Tanggal Transaksi</th>
-                <th>Qty</th>
-                <th>Harga</th>
-                <th>Total</th>
-                <th>Status</th> {{-- Add this --}}
-                <th>Kurang Bayar</th> {{-- Add this --}}
-                <th>Sub Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php
-                $grandTotal = 0;
-                $rowNumber = 0;
-            @endphp
-            @foreach ($datatransaksi as $transaksi)
+    @if (isset($datatransaksi))
+        {{-- Transaksi Section --}}
+        <table>
+            <thead>
                 <tr>
-                    <td style="text-align: center;">{{ ++$rowNumber }}</td>
-                    <td>{{ $transaksi->user->name }}</td>
-                    <td>{{ $transaksi->no_inv }}</td>
-                    <td>{{ $transaksi->customer }}</td>
-                    <td>{{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d F Y, H:i') }}</td>
-                    <td>
-                        @foreach ($transaksi->details as $detail)
-                            {{ $detail->berat }} kg @ {{ $detail->qty }}pcs<br>
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($transaksi->details as $detail)
-                            Rp {{ number_format($detail->harga, 0, ',', '.') }}<br>
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($transaksi->details as $detail)
-                            Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}<br>
-                        @endforeach
-                    </td>
-
-                    @php
-                        $totalBayar = $transaksi->bayar ? $transaksi->bayar->sum('nominal') : 0;
-                        $sisa = $transaksi->total - $totalBayar;
-                        $status = $transaksi->status == 0 ? 'Lunas' : 'Belum Lunas';
-                    @endphp
-                    <td style="text-align: center;"
-                        class="{{ $transaksi->status != 0 ? 'text-danger' : 'text-success' }}">
-                        {{ $status }}
-                    </td>
-
-                    <td class="price">
-                        @if ($transaksi->status != 0)
-                            Rp {{ number_format($sisa, 0, ',', '.') }}
-                        @else
-                            -
-                        @endif
-                    </td>
-
-                    <td class="price">Rp {{ number_format($transaksi->total - $sisa, 0, ',', '.') }}</td>
+                    <th>No</th>
+                    <th>Petugas</th>
+                    <th>No Invoice</th>
+                    <th>Customer</th>
+                    <th>Tanggal Transaksi</th>
+                    <th>Qty</th>
+                    <th>Harga</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Kurang Bayar</th>
+                    <th>Sub Total</th>
                 </tr>
-
+            </thead>
+            <tbody>
                 @php
-                    $grandTotal += $transaksi->total; // Sum total for the invoice
+                    $grandTotal = 0;
+                    $totalKurangBayar = 0;
+                    $rowNumber = 0;
                 @endphp
-            @endforeach
-        </tbody>
-        <tfoot>
-            @php
-                $grandTotal = 0;
-                $totalKurangBayar = 0;
-                foreach ($datatransaksi as $transaksi) {
-                    $totalBayar = $transaksi->bayar ? $transaksi->bayar->sum('nominal') : 0;
-                    $sisa = $transaksi->total - $totalBayar;
-                    $grandTotal += $transaksi->total;
-                    $totalKurangBayar += $sisa;
-                }
-                $totalPaid = $grandTotal - $totalKurangBayar;
-            @endphp
-            <tr>
-                <td colspan="7"></td>
-                <td class="price"><b>Rp {{ number_format($grandTotal, 0, ',', '.') }}</b></td>
-                <td></td>
-                <td class="price text-danger"><b>Rp {{ number_format($totalKurangBayar, 0, ',', '.') }}</b></td>
-                <td class="price text-success"><b>Rp {{ number_format($totalPaid, 0, ',', '.') }}</b></td>
-            </tr>
-        </tfoot>
-    </table>
+                @foreach ($datatransaksi as $transaksi)
+                    <tr>
+                        <td style="text-align: center;">{{ ++$rowNumber }}</td>
+                        <td>{{ $transaksi->user->name }}</td>
+                        <td>{{ $transaksi->no_inv }}</td>
+                        <td>{{ $transaksi->customer }}</td>
+                        <td>{{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d F Y, H:i') }}</td>
+                        <td>
+                            @foreach ($transaksi->details as $detail)
+                                {{ $detail->berat }} kg @ {{ $detail->qty }}pcs<br>
+                            @endforeach
+                        </td>
+                        <td>
+                            @foreach ($transaksi->details as $detail)
+                                Rp {{ number_format($detail->harga, 0, ',', '.') }}<br>
+                            @endforeach
+                        </td>
+                        <td>
+                            @foreach ($transaksi->details as $detail)
+                                Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}<br>
+                            @endforeach
+                        </td>
+                        @php
+                            $totalBayar = $transaksi->bayar ? $transaksi->bayar->sum('nominal') : 0;
+                            $sisa = $transaksi->total - $totalBayar;
+                            $status = $transaksi->status == 0 ? 'Lunas' : 'Belum Lunas';
+                            $grandTotal += $transaksi->total;
+                            $totalKurangBayar += $sisa;
+                        @endphp
+                        <td class="{{ $transaksi->status != 0 ? 'text-danger' : 'text-success' }}">{{ $status }}
+                        </td>
+                        <td class="price">
+                            @if ($sisa > 0)
+                                Rp {{ number_format($sisa, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="price">Rp {{ number_format($transaksi->total - $sisa, 0, ',', '.') }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="7"></td>
+                    <td class="price"><b>Rp {{ number_format($grandTotal, 0, ',', '.') }}</b></td>
+                    <td></td>
+                    <td class="price text-danger"><b>Rp {{ number_format($totalKurangBayar, 0, ',', '.') }}</b></td>
+                    <td class="price text-success"><b>Rp
+                            {{ number_format($grandTotal - $totalKurangBayar, 0, ',', '.') }}</b></td>
+                </tr>
+            </tfoot>
+        </table>
+    @elseif(isset($datapengeluaran))
+        {{-- Pengeluaran Section --}}
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Petugas</th>
+                    <th>Tanggal</th>
+                    <th colspan="2">Rincian</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $totalPengeluaran = 0;
+                    $no = 1;
+                @endphp
+                @forelse ($datapengeluaran as $pengeluaran)
+                    @php
+                        $subtotal = $pengeluaran->details->sum('nominal');
+                        $totalPengeluaran += $subtotal;
+                    @endphp
+                    <tr>
+                        <td style="text-align: center;">{{ $no++ }}</td>
+                        <td>{{ $pengeluaran->user->name }}</td>
+                        <td>{{ \Carbon\Carbon::parse($pengeluaran->tanggal)->translatedFormat('d F Y') }}</td>
+
+                        <td>
+                            @foreach ($pengeluaran->details as $detail)
+                                <div>{{ $detail->keterangan }}</div>
+                            @endforeach
+                        </td>
+                        <td>
+                            @foreach ($pengeluaran->details as $detail)
+                                <div>{{ number_format($detail->nominal, 0, ',', '.') }}</div>
+                            @endforeach
+                        </td>
+                        <td class="price">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" style="text-align: center;">Tidak ada pengeluaran</td>
+                    </tr>
+                @endforelse
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="total-row">Total Pengeluaran</td>
+                    <td class="price"><strong>Rp{{ number_format($totalPengeluaran, 0, ',', '.') }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    @endif
 </body>
 
 </html>

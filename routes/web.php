@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\PrivilageController;
 use App\Http\Controllers\Backend\TransaksiController;
+use App\Http\Controllers\Backend\PengeluaranController;
 
 // Route::get('/', function () {
 //     return ['Laravel' => app()->version()];
@@ -34,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('transaksi', TransaksiController::class); //transaksi
     
     Route::post('/transaksi/{id}/cicil', [TransaksiController::class, 'cicil'])->name('transaksi.cicil');
+    Route::resource('pengeluaran', PengeluaranController::class); //pengeluaran
 
 });
 

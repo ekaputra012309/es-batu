@@ -9,6 +9,7 @@ use App\Models\TransaksiDetail;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Bayar;
+use App\Models\PengeluaranHeader;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
@@ -237,33 +238,44 @@ class TransaksiController extends Controller
 
     public function cetakLaporan(Request $request)
     {
-        $startDate = Carbon::parse($request->startDate)->startOfDay()->toDateTimeString();
-        $endDate = Carbon::parse($request->endDate)->endOfDay()->toDateTimeString();
-
         $request->validate([
+            'report_type' => 'required|in:transaksi,pengeluaran',
             'startDate' => 'required|date',
             'endDate' => 'required|date|after_or_equal:startDate',
         ]);
-    
-        $transaksiQuery = Transaksi::with('user', 'details', 'bayar')->orderBy('created_at', 'desc');
 
-        // Add date filtering only if both dates are provided
-        if ($startDate && $endDate) {
-            $transaksiQuery->whereBetween('created_at', [$startDate, $endDate]);
+        // For transaksi: we need full datetime
+        $startDateTime = Carbon::parse($request->startDate)->startOfDay();
+        $endDateTime = Carbon::parse($request->endDate)->endOfDay();
+
+        // For pengeluaran: we only need plain date strings
+        $startDate = Carbon::parse($request->startDate)->toDateString();
+        $endDate = Carbon::parse($request->endDate)->toDateString();
+
+        if ($request->report_type === 'transaksi') {
+            $data = [
+                'title' => 'Laporan Transaksi | ',
+                'datatransaksi' => Transaksi::with('user', 'details', 'bayar')
+                    ->whereBetween('created_at', [$startDateTime, $endDateTime])
+                    ->orderBy('created_at', 'desc')
+                    ->get(),
+            ];
+        } else {
+            $data = [
+                'title' => 'Laporan Pengeluaran | ',
+                'datapengeluaran' => PengeluaranHeader::with('user', 'details')
+                    ->whereBetween('tanggal', [$startDate, $endDate]) // date-only comparison
+                    ->orderBy('tanggal', 'asc')
+                    ->get(),
+            ];
         }
-    
-        $transaksi = $transaksiQuery->get();
 
-        $data = array(
-            'title' => 'Laporan | ',
-            'datatransaksi' => $transaksi,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-        );        
-        // dd($data);
+        $data['startDate'] = $startDate;
+        $data['endDate'] = $endDate;
+
         $pdf = FacadePdf::loadView('backend.transaksi.print_laporan', $data);
-        $pdf->setPaper('A4', 'landscape');
-        return $pdf->stream('Laporan-'.$startDate.'-'.$endDate.'.pdf');
+        $pdf->setPaper('A4', $request->report_type === 'transaksi' ? 'landscape' : 'portrait');
+        return $pdf->stream('Laporan-' . $startDate . '-' . $endDate . '.pdf');
     }
 
     public function cicil(Request $request, $id)
