@@ -19,6 +19,26 @@ use Illuminate\Support\Facades\Route;
 
 class TransaksiController extends Controller
 {
+
+    protected function redirectBackToDashboardIfNeeded()
+    {
+        $previousUrl = url()->previous();
+
+        try {
+            $route = app('router')->getRoutes()->match(Request::create($previousUrl));
+            $previousRoute = $route->getName();
+        } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
+            $previousRoute = null;
+        }
+
+        // Fallback by checking path
+        if ($previousRoute === 'dashboard' || str_contains($previousUrl, '/dashboard')) {
+            return redirect()->route('dashboard');
+        }
+
+        return redirect()->route('transaksi.index');
+    }
+
     protected function generateInvoiceNumber($userId)
     {
         // Format the date
@@ -40,8 +60,8 @@ class TransaksiController extends Controller
     public function index()
     {
         $transaksi = Transaksi::with('user', 'details', 'bayar')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
         $userId = auth()->user()->id;
         $no_inv = $this->generateInvoiceNumber($userId);
         $data = array(
@@ -74,9 +94,6 @@ class TransaksiController extends Controller
 
     public function store(Request $request)
     {
-        $previousUrl = url()->previous();
-        $previousRoute = app('router')->getRoutes()->match(Request::create($previousUrl))->getName();
-
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'details' => 'required|array',
@@ -88,7 +105,7 @@ class TransaksiController extends Controller
             'nominal' => 'nullable|numeric|min:0',
         ]);
         // dd($request->all());
-        
+
         $total = collect($request->details)->sum(function ($detail) {
             return $detail['qty'] * $detail['harga'];
         });
@@ -126,10 +143,8 @@ class TransaksiController extends Controller
             ]);
 
             Alert::success('Success', 'Item berhasil ditambahkan ke transaksi.')->autoClose(2000);
-            if ($previousRoute === 'dashboard') {
-                return redirect()->route('dashboard');
-            }
-            return redirect()->route('transaksi.index');
+
+            return $this->redirectBackToDashboardIfNeeded();
         }
 
         $no_inv = $this->generateInvoiceNumber($request->user_id);
@@ -160,14 +175,10 @@ class TransaksiController extends Controller
                 'nominal' => $request->nominal,
                 'user_id' => $request->user_id,
             ]);
-        }        
+        }
 
         Alert::success('Success', 'Transaksi created successfully.')->autoClose(2000);
-        session()->flash('print_transaction_id', $transaksi->id);
-        if ($previousRoute === 'dashboard') {
-            return redirect()->route('dashboard');
-        }
-        return redirect()->route('transaksi.index');
+        return $this->redirectBackToDashboardIfNeeded();
     }
 
     public function edit(transaksi $transaksi)
@@ -219,7 +230,7 @@ class TransaksiController extends Controller
         $pdf = FacadePdf::loadView('backend.transaksi.print_transaksi', compact('transaksi'));
         // $pdf->setPaper('A7', 'portrait');
         $pdf->setPaper([0, 0, 219, 620], 'portrait');
-        return $pdf->stream(''.$transaksi->no_inv.'.pdf');
+        return $pdf->stream('' . $transaksi->no_inv . '.pdf');
     }
 
     public function clearSession()
@@ -229,10 +240,10 @@ class TransaksiController extends Controller
     }
 
     public function laporan()
-    {   
+    {
         $data = array(
             'title' => 'Laporan | ',
-        );        
+        );
         return view('backend.transaksi.laporan', $data);
     }
 
@@ -309,12 +320,6 @@ class TransaksiController extends Controller
         }
 
         Alert::success('Berhasil', 'Pembayaran cicilan berhasil ditambahkan');
-        $previousUrl = url()->previous();
-        $previousRoute = app('router')->getRoutes()->match(Request::create($previousUrl))->getName();
-        if ($previousRoute === 'dashboard') {
-            return redirect()->route('dashboard');
-        }
-        return redirect()->route('transaksi.index');
+        return $this->redirectBackToDashboardIfNeeded();
     }
-
 }
