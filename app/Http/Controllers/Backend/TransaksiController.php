@@ -92,6 +92,44 @@ class TransaksiController extends Controller
         return view('backend.transaksi.create', $data);
     }
 
+    public function storeDetail(Request $request, $transaksiId)
+    {
+        $request->validate([
+            'details' => 'required|array',
+            'details.*.berat' => 'required',
+            'details.*.qty' => 'required|integer|min:1',
+            'details.*.harga' => 'required|numeric',
+        ]);
+
+        $transaksi = Transaksi::findOrFail($transaksiId);
+
+        $total = 0;
+
+        foreach ($request->details as $detail) {
+            $subtotal = $detail['qty'] * $detail['harga'];
+            $total += $subtotal;
+
+            TransaksiDetail::create([
+                'table_transaksi_id' => $transaksiId,
+                'no_inv' => $transaksi->no_inv,
+                'berat' => $detail['berat'],
+                'qty' => $detail['qty'],
+                'harga' => $detail['harga'],
+                'satuan' => $detail['satuan'] ?? '',
+                'user_id' => $request->user_id,
+                'tanggal' => $request->tanggal ?? now()->toDateString(),
+            ]);
+        }
+
+        // Update the total in the transaksi
+        $transaksi->update([
+            'total' => $transaksi->total + $total,
+        ]);
+
+        Alert::success('Success', 'Item Add successfully.')->autoClose(2000);
+        return $this->redirectBackToDashboardIfNeeded();
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -110,43 +148,6 @@ class TransaksiController extends Controller
             return $detail['qty'] * $detail['harga'];
         });
 
-        // ✅ 1. ADD ITEM TO EXISTING TRANSAKSI
-        if ($request->filled('transaksi_id')) {
-            $transaksi = Transaksi::findOrFail($request->transaksi_id);
-
-            // Add new detail items
-            foreach ($request->details as $detail) {
-                TransaksiDetail::create([
-                    'table_transaksi_id' => $transaksi->id,
-                    'no_inv' => $transaksi->no_inv,
-                    'berat' => $detail['berat'],
-                    'qty' => $detail['qty'],
-                    'harga' => $detail['harga'],
-                    'satuan' => $detail['satuan'],
-                    'user_id' => $request->user_id,
-                ]);
-            }
-
-            // Add payment if status is Lunas (0)
-            if ($request->status == '0' && $request->filled('nominal')) {
-                Bayar::create([
-                    'table_transaksi_id' => $transaksi->id,
-                    'nominal' => $request->nominal,
-                    'user_id' => $request->user_id,
-                ]);
-            }
-
-            // Update total and status
-            $transaksi->update([
-                'total' => $transaksi->total + $total,
-                'status' => $request->status,
-            ]);
-
-            Alert::success('Success', 'Item berhasil ditambahkan ke transaksi.')->autoClose(2000);
-
-            return $this->redirectBackToDashboardIfNeeded();
-        }
-
         $no_inv = $this->generateInvoiceNumber($request->user_id);
 
         $transaksi = Transaksi::create([
@@ -155,6 +156,7 @@ class TransaksiController extends Controller
             'user_id' => $request->user_id,
             'customer' => $request->customer ?? '',
             'status' => $request->status,
+            'tanggal' => $request->tanggal ?? now()->toDateString(),
         ]);
 
         foreach ($request->details as $detail) {
@@ -166,6 +168,7 @@ class TransaksiController extends Controller
                 'harga' => $detail['harga'],
                 'satuan' => $detail['satuan'],
                 'user_id' => $request->user_id,
+                'tanggal' => $request->tanggal ?? now()->toDateString(),
             ]);
         }
 
@@ -228,8 +231,8 @@ class TransaksiController extends Controller
     {
         $transaksi = Transaksi::with('details', 'user', 'bayar')->findOrFail($id);
         $pdf = FacadePdf::loadView('backend.transaksi.print_transaksi', compact('transaksi'));
-        // $pdf->setPaper('A7', 'portrait');
-        $pdf->setPaper([0, 0, 219, 620], 'portrait');
+        $pdf->setPaper('A4', 'portrait');
+        // $pdf->setPaper([0, 0, 219, 620], 'portrait');
         return $pdf->stream('' . $transaksi->no_inv . '.pdf');
     }
 

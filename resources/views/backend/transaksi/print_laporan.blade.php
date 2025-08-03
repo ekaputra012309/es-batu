@@ -105,7 +105,18 @@
                         <td>{{ $transaksi->user->name }}</td>
                         <td>{{ $transaksi->no_inv }}</td>
                         <td>{{ $transaksi->customer }}</td>
-                        <td>{{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d F Y, H:i') }}</td>
+                        <td>
+                            {{-- {{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d F Y, H:i') }}
+                            <br> --}}
+                            @if ($transaksi->details)
+                                @foreach ($transaksi->details as $detail)
+                                    <i class="fas fa-calendar small"></i>
+                                    {{ $detail->tanggal ? \Carbon\Carbon::parse($detail->tanggal)->translatedFormat('d F Y') : '-' }}<br>
+                                @endforeach
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>
                             @foreach ($transaksi->details as $detail)
                                 {{ $detail->berat }} kg @ {{ $detail->qty }}pcs<br>

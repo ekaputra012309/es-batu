@@ -1,55 +1,29 @@
-<!-- Modal for Add Item -->
-<div class="modal fade" id="itemModal{{ $transaksi->id }}" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg">
-        <form action="{{ route('transaksi.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="user_id" value="{{ auth()->id() }}">
-            <input type="hidden" name="transaksi_id" value="{{ $transaksi->id }}">
-            <input type="hidden" name="status" value="1">
-            <!-- Cicil default -->
-            <input type="hidden" name="nominal" value="0">
-            <!-- Hidden -->
+{{-- Modal Add Item Detail --}}
+<div class="modal fade" id="addItemModal{{ $transaksi->id }}" tabindex="-1" role="dialog"
+    aria-labelledby="addItemModalLabel{{ $transaksi->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form action="{{ route('transaksi.detail.store', ['transaksiId' => $transaksi->id]) }}" method="POST"
+                    class="detail-form" data-transaksi-id="{{ $transaksi->id }}">
+                    @csrf
+                    @auth
+                        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                    @endauth
 
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Item</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-
-                <div class="modal-body">
-                    <div id="modalDetails{{ $transaksi->id }}">
-                        <div class="row mb-3 align-items-end">
-                            <div class="col-md-4">
-                                <label>Berat</label>
-                                <select name="details[0][berat]" class="form-control" required>
-                                    <option value="">Pilih Varian</option>
-                                    <option value="5">5 Kg</option>
-                                    <option value="10">10 Kg</option>
-                                    <option value="20">20 Kg</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label>Qty</label>
-                                <input type="number" name="details[0][qty]" class="form-control" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label>Harga</label>
-                                <input type="number" name="details[0][harga]" class="form-control" required>
-                                <input type="hidden" name="details[0][satuan]" value="Kg">
-                            </div>
-                        </div>
+                    <div class="form-group col-md-3">
+                        <label>Tanggal Transaksi</label>
+                        <input type="date" name="tanggal" class="form-control " value="{{ now()->format('Y-m-d') }}">
                     </div>
-                    <button type="button" class="btn btn-sm btn-secondary addModalDetail"
-                        data-id="{{ $transaksi->id }}">
-                        + Tambah Baris
-                    </button>
-                </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Simpan
-                        Item</button>
-                </div>
+                    <div id="detail-container-{{ $transaksi->id }}"></div>
+
+                    <button type="button" class="btn btn-sm btn-secondary mb-2 add-detail-btn"
+                        data-transaksi-id="{{ $transaksi->id }}">+ Tambah Detail</button>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>

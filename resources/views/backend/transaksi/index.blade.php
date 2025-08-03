@@ -59,9 +59,16 @@
                                     <div class="row">
                                         <div class="col-md-8">
                                             <h4 class="mb-4">Transaksi Detail</h4>
-                                            <div class="form-group">
-                                                <label for="customer">Customer:</label>
-                                                <input type="text" class="form-control" name="customer">
+                                            <div class="row">
+                                                <div class="form-group col-md-3">
+                                                    <label>Tanggal Transaksi</label>
+                                                    <input type="date" name="tanggal" class="form-control "
+                                                        value="{{ now()->format('Y-m-d') }}">
+                                                </div>
+                                                <div class="form-group col-md-9">
+                                                    <label for="customer">Customer:</label>
+                                                    <input type="text" class="form-control " name="customer">
+                                                </div>
                                             </div>
                                             <div id="details">
                                                 <div class="row mb-3 align-items-end">
@@ -171,7 +178,7 @@
                                                         </button>
 
                                                         <button class="btn btn-xs btn-success" data-toggle="modal"
-                                                            data-target="#itemModal{{ $transaksi->id }}">
+                                                            data-target="#addItemModal{{ $transaksi->id }}">
                                                             <i class="fas fa-plus"></i> Add Item
                                                         </button>
                                                     @endif
@@ -187,10 +194,20 @@
                                                 </td>
                                                 <td>
                                                     <i class="fas fa-calendar small"></i>
-                                                    {{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d F Y') }}
-                                                    <br>
+                                                    {{ \Carbon\Carbon::parse($transaksi->tanggal)->translatedFormat('d F Y') }}
+
                                                     <i class="fas fa-clock small"></i>
                                                     {{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('H:i') }}
+                                                    <br>
+                                                    @if ($transaksi->details)
+                                                        @foreach ($transaksi->details as $detail)
+                                                            <i class="fas fa-calendar small"></i>
+                                                            {{ $detail->tanggal ? \Carbon\Carbon::parse($detail->tanggal)->translatedFormat('d F Y') : '-' }}<br>
+                                                        @endforeach
+                                                    @else
+                                                        -
+                                                    @endif
+
                                                 </td>
                                                 <td>
                                                     <div class="d-flex justify-content-between">
@@ -225,13 +242,7 @@
                                                 </td>
                                                 <td>{{ $transaksi->user->name }}</td>
                                             </tr>
-
-                                            @include('backend.transaksi.modals.additem', [
-                                                'transaksi' => $transaksi,
-                                            ])
                                         @endforeach
-
-                                        @include('backend.transaksi.script.additem')
 
                                     </tbody>
                                 </table>
@@ -245,8 +256,16 @@
                                         @include('backend.transaksi.modals.cicil', [
                                             'transaksi' => $transaksi,
                                         ])
+
+                                        @include('backend.transaksi.modals.additem', [
+                                            'transaksi' => $transaksi,
+                                        ])
                                     @endif
                                 @endforeach
+
+                                @include('backend.transaksi.script.additem', [
+                                    'transaksi' => $transaksi,
+                                ])
                             </div>
                         </div>
                     </div>
