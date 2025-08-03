@@ -22,7 +22,8 @@ class Transaksi extends Model
 
     public function details()
     {
-        return $this->hasMany(TransaksiDetail::class, 'table_transaksi_id');
+        // return $this->hasMany(TransaksiDetail::class, 'table_transaksi_id');
+        return $this->hasMany(TransaksiDetail::class, 'table_transaksi_id')->orderBy('tanggal', 'asc');
     }
 
     public function bayar()
