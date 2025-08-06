@@ -76,53 +76,85 @@
     </table>
 
     <h3>Detail Transaksi</h3>
-    <table>
-        @foreach ($transaksi->details as $detail)
+    <table border="1">
+        <thead>
             <tr>
-                <td>{{ $detail->berat }} {{ $detail->satuan }} ( {{ $detail->qty }} pcs x Rp
-                    {{ number_format($detail->harga, 0, ',', '.') }} )</td>
-                <td class="price">Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}</td>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Berat</th>
+                <th>Qty</th>
+                <th>Harga Satuan</th>
+                <th>Subtotal</th>
             </tr>
-        @endforeach
-        <tr class="total-row">
-            <td>Total</td>
-            <td class="price">Rp {{ number_format($transaksi->total, 0, ',', '.') }}</td>
-        </tr>
-
-        @php
-            $totalBayar = $transaksi->bayar->sum('nominal');
-            $sisa = $transaksi->total - $totalBayar;
-        @endphp
-
-        <tr>
-            <td colspan="2"><strong>Detail Pembayaran:</strong></td>
-        </tr>
-        @foreach ($transaksi->bayar as $bayar)
-            <tr>
-                <td>- {{ \Carbon\Carbon::parse($bayar->created_at)->translatedFormat('d M Y H:i') }}</td>
-                <td class="price">Rp {{ number_format($bayar->nominal, 0, ',', '.') }}</td>
-            </tr>
-        @endforeach
-
-        <tr class="total-row">
-            <td>Total Dibayar</td>
-            <td class="price">Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>
-        </tr>
-
-        @if ($transaksi->status == 0)
-            <tr>
-                <td colspan="2" class="text-center"><strong>Transaksi sudah lunas</strong></td>
-            </tr>
-        @else
+        </thead>
+        <tbody>
+            @foreach ($transaksi->details as $index => $detail)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>
+                        {{ $detail->tanggal ? \Carbon\Carbon::parse($detail->tanggal)->translatedFormat('d F Y') : '-' }}
+                    </td>
+                    <td>{{ $detail->berat }} {{ $detail->satuan }}</td>
+                    <td>{{ $detail->qty }}</td>
+                    <td class="price">Rp {{ number_format($detail->harga, 0, ',', '.') }}</td>
+                    <td class="price">Rp {{ number_format($detail->qty * $detail->harga, 0, ',', '.') }}</td>
+                </tr>
+            @endforeach
             <tr class="total-row">
-                <td>Sisa Pembayaran</td>
-                <td class="price text-danger">Rp {{ number_format($sisa, 0, ',', '.') }}</td>
+                <td colspan="5" style="text-align: right;"><strong>Total</strong></td>
+                <td class="price"><strong>Rp {{ number_format($transaksi->total, 0, ',', '.') }}</strong></td>
             </tr>
-            <tr>
-                <td colspan="2" class="text-center"> <strong>Harap segera melunasi sisa pembayaran</strong></td>
-            </tr>
-        @endif
+        </tbody>
     </table>
+    <h3>Detail Pembayaran</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Tanggal Bayar</th>
+                <th>Nominal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $totalBayar = 0;
+            @endphp
+            @forelse ($transaksi->bayar as $i => $bayar)
+                @php
+                    $totalBayar += $bayar->nominal;
+                @endphp
+                <tr>
+                    <td>{{ $i + 1 }}</td>
+                    <td>{{ \Carbon\Carbon::parse($bayar->created_at)->translatedFormat('d F Y H:i') }}</td>
+                    <td class="price">Rp {{ number_format($bayar->nominal, 0, ',', '.') }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="3" style="text-align: center;">Belum ada pembayaran</td>
+                </tr>
+            @endforelse
+            <tr class="total-row">
+                <td colspan="2" style="text-align: right;"><strong>Total Tagihan</strong></td>
+                <td class="price"><strong>Rp {{ number_format($transaksi->total, 0, ',', '.') }}</strong></td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="2" style="text-align: right;"><strong>Total Dibayar</strong></td>
+                <td class="price"><strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></td>
+            </tr>
+            @if ($transaksi->status != 0)
+                <tr class="total-row">
+                    <td colspan="2" style="text-align: right;">Sisa Pembayaran</td>
+                    <td class="price text-danger">Rp {{ number_format($transaksi->total - $totalBayar, 0, ',', '.') }}
+                    </td>
+                </tr>
+            @else
+                <tr>
+                    <td colspan="3" style="text-align: center;"><strong>Transaksi sudah lunas</strong></td>
+                </tr>
+            @endif
+        </tbody>
+    </table>
+
 
     <div class="footer">
         <p>Terima Kasih!</p>

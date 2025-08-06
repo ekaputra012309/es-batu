@@ -14,6 +14,7 @@ return new class extends Migration
         // Create the header table
         Schema::create('table_transaksis', function (Blueprint $table) {
             $table->id();
+            $table->datetime('tanggal')->nullable();
             $table->string('no_inv')->unique(); // Invoice number
             $table->string('customer')->nullable();
             $table->decimal('total', 10, 2); // Total amount
@@ -29,6 +30,7 @@ return new class extends Migration
         Schema::create('table_transaksi_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('table_transaksi_id'); // Foreign key referencing the header table
+            $table->datetime('tanggal')->nullable();
             $table->string('no_inv'); // Invoice number
             $table->integer('berat'); // Quantity
             $table->integer('qty'); // Quantity
