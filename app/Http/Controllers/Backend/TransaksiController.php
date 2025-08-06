@@ -19,6 +19,26 @@ use Illuminate\Support\Facades\Route;
 
 class TransaksiController extends Controller
 {
+
+    protected function redirectBackToDashboardIfNeeded()
+    {
+        $previousUrl = url()->previous();
+
+        try {
+            $route = app('router')->getRoutes()->match(Request::create($previousUrl));
+            $previousRoute = $route->getName();
+        } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
+            $previousRoute = null;
+        }
+
+        // Fallback by checking path
+        if ($previousRoute === 'dashboard' || str_contains($previousUrl, '/dashboard')) {
+            return redirect()->route('dashboard');
+        }
+
+        return redirect()->route('transaksi.index');
+    }
+
     protected function generateInvoiceNumber($userId)
     {
         // Format the date
@@ -40,8 +60,8 @@ class TransaksiController extends Controller
     public function index()
     {
         $transaksi = Transaksi::with('user', 'details', 'bayar')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
         $userId = auth()->user()->id;
         $no_inv = $this->generateInvoiceNumber($userId);
         $data = array(
@@ -72,11 +92,46 @@ class TransaksiController extends Controller
         return view('backend.transaksi.create', $data);
     }
 
+    public function storeDetail(Request $request, $transaksiId)
+    {
+        $request->validate([
+            'details' => 'required|array',
+            'details.*.berat' => 'required',
+            'details.*.qty' => 'required|integer|min:1',
+            'details.*.harga' => 'required|numeric',
+        ]);
+
+        $transaksi = Transaksi::findOrFail($transaksiId);
+
+        $total = 0;
+
+        foreach ($request->details as $detail) {
+            $subtotal = $detail['qty'] * $detail['harga'];
+            $total += $subtotal;
+
+            TransaksiDetail::create([
+                'table_transaksi_id' => $transaksiId,
+                'no_inv' => $transaksi->no_inv,
+                'berat' => $detail['berat'],
+                'qty' => $detail['qty'],
+                'harga' => $detail['harga'],
+                'satuan' => $detail['satuan'] ?? '',
+                'user_id' => $request->user_id,
+                'tanggal' => $request->tanggal ?? now()->toDateString(),
+            ]);
+        }
+
+        // Update the total in the transaksi
+        $transaksi->update([
+            'total' => $transaksi->total + $total,
+        ]);
+
+        Alert::success('Success', 'Item Add successfully.')->autoClose(2000);
+        return $this->redirectBackToDashboardIfNeeded();
+    }
+
     public function store(Request $request)
     {
-        $previousUrl = url()->previous();
-        $previousRoute = app('router')->getRoutes()->match(Request::create($previousUrl))->getName();
-
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'details' => 'required|array',
@@ -88,49 +143,10 @@ class TransaksiController extends Controller
             'nominal' => 'nullable|numeric|min:0',
         ]);
         // dd($request->all());
-        
+
         $total = collect($request->details)->sum(function ($detail) {
             return $detail['qty'] * $detail['harga'];
         });
-
-        // ✅ 1. ADD ITEM TO EXISTING TRANSAKSI
-        if ($request->filled('transaksi_id')) {
-            $transaksi = Transaksi::findOrFail($request->transaksi_id);
-
-            // Add new detail items
-            foreach ($request->details as $detail) {
-                TransaksiDetail::create([
-                    'table_transaksi_id' => $transaksi->id,
-                    'no_inv' => $transaksi->no_inv,
-                    'berat' => $detail['berat'],
-                    'qty' => $detail['qty'],
-                    'harga' => $detail['harga'],
-                    'satuan' => $detail['satuan'],
-                    'user_id' => $request->user_id,
-                ]);
-            }
-
-            // Add payment if status is Lunas (0)
-            if ($request->status == '0' && $request->filled('nominal')) {
-                Bayar::create([
-                    'table_transaksi_id' => $transaksi->id,
-                    'nominal' => $request->nominal,
-                    'user_id' => $request->user_id,
-                ]);
-            }
-
-            // Update total and status
-            $transaksi->update([
-                'total' => $transaksi->total + $total,
-                'status' => $request->status,
-            ]);
-
-            Alert::success('Success', 'Item berhasil ditambahkan ke transaksi.')->autoClose(2000);
-            if ($previousRoute === 'dashboard') {
-                return redirect()->route('dashboard');
-            }
-            return redirect()->route('transaksi.index');
-        }
 
         $no_inv = $this->generateInvoiceNumber($request->user_id);
 
@@ -140,6 +156,7 @@ class TransaksiController extends Controller
             'user_id' => $request->user_id,
             'customer' => $request->customer ?? '',
             'status' => $request->status,
+            'tanggal' => $request->tanggal ?? now()->toDateString(),
         ]);
 
         foreach ($request->details as $detail) {
@@ -151,6 +168,7 @@ class TransaksiController extends Controller
                 'harga' => $detail['harga'],
                 'satuan' => $detail['satuan'],
                 'user_id' => $request->user_id,
+                'tanggal' => $request->tanggal ?? now()->toDateString(),
             ]);
         }
 
@@ -160,14 +178,10 @@ class TransaksiController extends Controller
                 'nominal' => $request->nominal,
                 'user_id' => $request->user_id,
             ]);
-        }        
+        }
 
         Alert::success('Success', 'Transaksi created successfully.')->autoClose(2000);
-        session()->flash('print_transaction_id', $transaksi->id);
-        if ($previousRoute === 'dashboard') {
-            return redirect()->route('dashboard');
-        }
-        return redirect()->route('transaksi.index');
+        return $this->redirectBackToDashboardIfNeeded();
     }
 
     public function edit(transaksi $transaksi)
@@ -217,9 +231,9 @@ class TransaksiController extends Controller
     {
         $transaksi = Transaksi::with('details', 'user', 'bayar')->findOrFail($id);
         $pdf = FacadePdf::loadView('backend.transaksi.print_transaksi', compact('transaksi'));
-        // $pdf->setPaper('A7', 'portrait');
-        $pdf->setPaper([0, 0, 219, 620], 'portrait');
-        return $pdf->stream(''.$transaksi->no_inv.'.pdf');
+        $pdf->setPaper('A4', 'portrait');
+        // $pdf->setPaper([0, 0, 219, 620], 'portrait');
+        return $pdf->stream('' . $transaksi->no_inv . '.pdf');
     }
 
     public function clearSession()
@@ -229,10 +243,10 @@ class TransaksiController extends Controller
     }
 
     public function laporan()
-    {   
+    {
         $data = array(
             'title' => 'Laporan | ',
-        );        
+        );
         return view('backend.transaksi.laporan', $data);
     }
 
@@ -309,12 +323,6 @@ class TransaksiController extends Controller
         }
 
         Alert::success('Berhasil', 'Pembayaran cicilan berhasil ditambahkan');
-        $previousUrl = url()->previous();
-        $previousRoute = app('router')->getRoutes()->match(Request::create($previousUrl))->getName();
-        if ($previousRoute === 'dashboard') {
-            return redirect()->route('dashboard');
-        }
-        return redirect()->route('transaksi.index');
+        return $this->redirectBackToDashboardIfNeeded();
     }
-
 }

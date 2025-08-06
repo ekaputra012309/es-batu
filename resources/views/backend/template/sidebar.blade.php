@@ -69,6 +69,14 @@
 
                 @if (in_array($role, ['superadmin', 'admin']))
                     <li class="nav-item">
+                        <a href="{{ route('slip.index') }}"
+                            class="nav-link {{ request()->routeIs('slip.index') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                            <p>Slip Gaji </p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a href="{{ route('transaksi.laporan') }}"
                             class="nav-link {{ request()->routeIs('transaksi.laporan') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-list-alt"></i>

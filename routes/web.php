@@ -7,6 +7,7 @@ use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\PrivilageController;
 use App\Http\Controllers\Backend\TransaksiController;
 use App\Http\Controllers\Backend\PengeluaranController;
+use App\Http\Controllers\Backend\SlipController;
 
 // Route::get('/', function () {
 //     return ['Laravel' => app()->version()];
@@ -26,6 +27,8 @@ Route::get('/transaksi/laporan/cetak', [TransaksiController::class, 'cetakLapora
 Route::get('/company-profile', [Backend::class, 'editCompany'])->name('companyProfile');
 Route::put('/company-profile/update', [Backend::class, 'updateCompany'])->name('companyProfile.update');
 
+Route::get('/slip/print/{id}', [SlipController::class, 'print'])->name('slip.print');
+
 Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
@@ -35,7 +38,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('transaksi', TransaksiController::class); //transaksi
     
     Route::post('/transaksi/{id}/cicil', [TransaksiController::class, 'cicil'])->name('transaksi.cicil');
+    Route::post('/transaksi/{transaksiId}/details', [TransaksiController::class, 'storeDetail'])->name('transaksi.detail.store');
     Route::resource('pengeluaran', PengeluaranController::class); //pengeluaran
+    Route::resource('slip', SlipController::class); //slip
 
 });
 
