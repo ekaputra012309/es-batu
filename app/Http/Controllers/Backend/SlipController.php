@@ -14,10 +14,19 @@ class SlipController extends Controller
 {
     public function index()
     {
-        $slip = Slip::all();
+        $slips = Slip::all();
+        $slips->transform(function ($slip) {
+            $slip->formatted_gp = 'Rp ' . number_format($slip->gp, 0, ',', '.');
+            $slip->formatted_hutang = 'Rp ' . number_format($slip->hutang, 0, ',', '.');
+    
+            $slip->gaji_diterima = ($slip->gp + $slip->inssentif + $slip->uang_makan + $slip->bonus) - ($slip->pot_uang_makan + $slip->pot_kasbon);
+            $slip->formatted_gaji_diterima = 'Rp ' . number_format($slip->gaji_diterima, 0, ',', '.');
+    
+            return $slip;
+        });
         $data = array(
             'title' => 'Slip | ',
-            'dataslip' => $slip,
+            'dataslip' => $slips,
         );
         $title = 'Delete Slip Gaji!';
         $text = "Are you sure you want to delete?";
@@ -41,11 +50,12 @@ class SlipController extends Controller
 
     public function store(Request $request)
     {
-        Slip::create($request->all());
+        dd($request->all());
+        // Slip::create($request->all());
 
-        Alert::success('Success', 'slip created successfully.');
+        // Alert::success('Success', 'slip created successfully.');
 
-        return redirect()->route('slip.index');
+        // return redirect()->route('slip.index');
     }
 
     public function edit(Slip $slip)

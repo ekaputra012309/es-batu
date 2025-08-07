@@ -47,18 +47,6 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($dataslip as $slip)
-                                            @php
-                                                $gp = 0;
-                                                $gp =
-                                                    $slip->gp +
-                                                    $slip->inssentif -
-                                                    ($slip->pot_uang_makan + $slip->pot_kasbon);
-
-                                                function formatRupiah($number)
-                                                {
-                                                    return 'Rp ' . number_format($number, 0, ',', '.');
-                                                }
-                                            @endphp
                                             <tr>
                                                 <td>
                                                     <a class="btn btn-xs btn-primary"
@@ -80,9 +68,9 @@
                                                     {{ \Carbon\Carbon::parse($slip->tanggal)->translatedFormat('d F Y') }}
                                                 </td>
                                                 <td>{{ $slip->nama }}</td>
-                                                <td>{{ formatRupiah($slip->gp) }}</td>
-                                                <td>{{ formatRupiah($gp) }}</td>
-                                                <td>{{ formatRupiah($slip->hutang) }}</td>
+                                                <td>{{ $slip->formatted_gp }}</td>
+                                                <td>{{ $slip->formatted_gaji_diterima }}</td>
+                                                <td>{{ $slip->formatted_hutang }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

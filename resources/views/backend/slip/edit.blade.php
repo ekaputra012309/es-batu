@@ -61,52 +61,78 @@
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Gaji Pokok</label>
-                                                <input type="number" name="gp" class="form-control"
-                                                    value="{{ old('gp', $slip->gp) }}" required>
+                                                <input type="text" class="form-control currency-input" data-target="gp"
+                                                    value="{{ number_format(old('gp', $slip->gp), 0, ',', '.') }}" required>
+                                                <input type="hidden" name="gp" id="gp"
+                                                    value="{{ old('gp', $slip->gp) }}">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Insentif</label>
-                                                <input type="number" name="inssentif" class="form-control"
-                                                    value="{{ old('inssentif', $slip->inssentif) }}" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="inssentif"
+                                                    value="{{ number_format(old('inssentif', $slip->inssentif), 0, ',', '.') }}"
+                                                    required>
+                                                <input type="hidden" name="inssentif" id="inssentif"
+                                                    value="{{ old('inssentif', $slip->inssentif) }}">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Bonus</label>
-                                                <input type="number" name="bonus" class="form-control"
-                                                    value="{{ old('bonus', $slip->bonus) }}" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="bonus"
+                                                    value="{{ number_format(old('bonus', $slip->bonus), 0, ',', '.') }}"
+                                                    required>
+                                                <input type="hidden" name="bonus" id="bonus"
+                                                    value="{{ old('bonus', $slip->bonus) }}">
                                             </div>
                                         </div>
 
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Uang Makan</label>
-                                                <input type="number" name="uang_makan" class="form-control"
-                                                    value="{{ old('uang_makan', $slip->uang_makan) }}" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="uang_makan"
+                                                    value="{{ number_format(old('uang_makan', $slip->uang_makan), 0, ',', '.') }}"
+                                                    required>
+                                                <input type="hidden" name="uang_makan" id="uang_makan"
+                                                    value="{{ old('uang_makan', $slip->uang_makan) }}">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Potongan Uang Makan</label>
-                                                <input type="number" name="pot_uang_makan" class="form-control"
-                                                    value="{{ old('pot_uang_makan', $slip->pot_uang_makan) }}" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="pot_uang_makan"
+                                                    value="{{ number_format(old('pot_uang_makan', $slip->pot_uang_makan), 0, ',', '.') }}"
+                                                    required>
+                                                <input type="hidden" name="pot_uang_makan" id="pot_uang_makan"
+                                                    value="{{ old('pot_uang_makan', $slip->pot_uang_makan) }}">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Potongan Kasbon</label>
-                                                <input type="number" name="pot_kasbon" class="form-control"
-                                                    value="{{ old('pot_kasbon', $slip->pot_kasbon) }}" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="pot_kasbon"
+                                                    value="{{ number_format(old('pot_kasbon', $slip->pot_kasbon), 0, ',', '.') }}"
+                                                    required>
+                                                <input type="hidden" name="pot_kasbon" id="pot_kasbon"
+                                                    value="{{ old('pot_kasbon', $slip->pot_kasbon) }}">
                                             </div>
                                         </div>
 
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Hutang</label>
-                                                <input type="number" name="hutang" class="form-control"
-                                                    value="{{ old('hutang', $slip->hutang) }}" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="hutang"
+                                                    value="{{ number_format(old('hutang', $slip->hutang), 0, ',', '.') }}"
+                                                    required>
+                                                <input type="hidden" name="hutang" id="hutang"
+                                                    value="{{ old('hutang', $slip->hutang) }}">
                                             </div>
                                         </div>
 

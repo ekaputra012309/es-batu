@@ -126,6 +126,35 @@
             });
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formatNumber = (num) => {
+                return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            };
+
+            const cleanNumber = (str) => {
+                return str.replace(/\./g, '');
+            };
+
+            document.querySelectorAll('.currency-input').forEach(input => {
+                const hiddenId = input.dataset.target;
+
+                input.addEventListener('input', function() {
+                    let cleaned = cleanNumber(this.value.replace(/[^\d]/g, ''));
+                    this.value = formatNumber(cleaned);
+                    document.getElementById(hiddenId).value = cleaned;
+                });
+
+                // Initial format if value already exists
+                let initial = input.value;
+                if (initial) {
+                    input.value = formatNumber(cleanNumber(initial));
+                    document.getElementById(hiddenId).value = cleanNumber(initial);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

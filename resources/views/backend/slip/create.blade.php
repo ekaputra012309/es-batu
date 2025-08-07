@@ -57,45 +57,59 @@
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Gaji Pokok</label>
-                                                <input type="number" name="gp" class="form-control" required>
+                                                <input type="text" class="form-control currency-input" data-target="gp"
+                                                    required>
+                                                <input type="hidden" name="gp" id="gp">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Insentif</label>
-                                                <input type="number" name="inssentif" class="form-control" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="inssentif" required>
+                                                <input type="hidden" name="inssentif" id="inssentif">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Bonus</label>
-                                                <input type="number" name="bonus" class="form-control" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="bonus" required>
+                                                <input type="hidden" name="bonus" id="bonus">
                                             </div>
                                         </div>
 
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Uang Makan</label>
-                                                <input type="number" name="uang_makan" class="form-control" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="uang_makan" required>
+                                                <input type="hidden" name="uang_makan" id="uang_makan">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Potongan Uang Makan</label>
-                                                <input type="number" name="pot_uang_makan" class="form-control" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="pot_uang_makan" required>
+                                                <input type="hidden" name="pot_uang_makan" id="pot_uang_makan">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Potongan Kasbon</label>
-                                                <input type="number" name="pot_kasbon" class="form-control" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="pot_kasbon" required>
+                                                <input type="hidden" name="pot_kasbon" id="pot_kasbon">
                                             </div>
                                         </div>
 
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
                                                 <label>Hutang</label>
-                                                <input type="number" name="hutang" class="form-control" required>
+                                                <input type="text" class="form-control currency-input"
+                                                    data-target="hutang" required>
+                                                <input type="hidden" name="hutang" id="hutang">
                                             </div>
                                         </div>
 
@@ -122,5 +136,7 @@
                 });
             });
         </script>
+
+
     </div>
 @endsection
