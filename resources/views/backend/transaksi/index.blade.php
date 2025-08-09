@@ -181,6 +181,11 @@
                                                             data-target="#addItemModal{{ $transaksi->id }}">
                                                             <i class="fas fa-plus"></i> Add Item
                                                         </button>
+
+                                                        <button class="btn btn-xs btn-primary" data-toggle="modal"
+                                                            data-target="#editItemModal{{ $transaksi->id }}">
+                                                            <i class="fas fa-edit"></i> Edit Item
+                                                        </button>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -260,12 +265,20 @@
                                         @include('backend.transaksi.modals.additem', [
                                             'transaksi' => $transaksi,
                                         ])
+
+                                        @include('backend.transaksi.modals.edititem', [
+                                            'transaksi' => $transaksi,
+                                        ])
                                     @endif
                                 @endforeach
+                                <script>
+                                    window.detailIndices = {};
+                                </script>
 
-                                @include('backend.transaksi.script.additem', [
-                                    'transaksi' => $transaksi,
-                                ])
+                                @include('backend.transaksi.script.additem')
+
+                                @include('backend.transaksi.script.edititem')
+
                             </div>
                         </div>
                     </div>

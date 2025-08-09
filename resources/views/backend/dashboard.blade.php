@@ -129,8 +129,13 @@
                                                         </button>
 
                                                         <button class="btn btn-xs btn-success" data-toggle="modal"
-                                                            data-target="#itemModal{{ $transaksi->id }}">
+                                                            data-target="#addItemModal{{ $transaksi->id }}">
                                                             <i class="fas fa-plus"></i> Add Item
+                                                        </button>
+
+                                                        <button class="btn btn-xs btn-primary" data-toggle="modal"
+                                                            data-target="#editItemModal{{ $transaksi->id }}">
+                                                            <i class="fas fa-edit"></i> Edit Item
                                                         </button>
                                                     @endif
                                                 </td>
@@ -173,13 +178,7 @@
                                                     @endforeach
                                                 </td>
                                             </tr>
-
-                                            @include('backend.transaksi.modals.additem', [
-                                                'transaksi' => $transaksi,
-                                            ])
                                         @endforeach
-
-                                        @include('backend.transaksi.script.additem')
 
                                     </tbody>
                                 </table>
@@ -193,7 +192,26 @@
                                         @include('backend.transaksi.modals.cicil', [
                                             'transaksi' => $transaksi,
                                         ])
+
+                                        @include('backend.transaksi.modals.additem', [
+                                            'transaksi' => $transaksi,
+                                        ])
+
+                                        @include('backend.transaksi.modals.edititem', [
+                                            'transaksi' => $transaksi,
+                                        ])
                                     @endif
+                                    <script>
+                                        window.detailIndices = {};
+                                    </script>
+
+                                    @include('backend.transaksi.script.additem', [
+                                        'transaksi' => $transaksi,
+                                    ])
+
+                                    @include('backend.transaksi.script.edititem', [
+                                        'transaksi' => $transaksi,
+                                    ])
                                 @endforeach
                             </div>
                         </div>
@@ -202,5 +220,18 @@
 
             </div>
         </section>
+
+        <script>
+            $("#example1").DataTable({
+                "responsive": false,
+                "scrollX": true,
+                "lengthChange": true,
+                "autoWidth": false, // usually better to disable this for scroll
+                "scrollCollapse": true,
+                "paging": true,
+                "pageLength": 5,
+                // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+        </script>
     </div>
 @endsection
