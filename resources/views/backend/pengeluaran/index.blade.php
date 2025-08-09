@@ -43,8 +43,11 @@
                                     <div id="details"></div>
                                     <button type="button" class="btn btn-secondary" id="addDetail">Tambah Detail</button>
 
-                                    <div class="mt-3">
-                                        <button type="submit" class="btn btn-primary">Simpan</button>
+                                    <div class="mt-3 d-flex">
+                                        <button type="submit" class="btn btn-primary mx-2">Simpan</button>
+                                        <button type="reset" class="btn btn-secondary" onclick="location.reload();">
+                                            Batal
+                                        </button>
                                     </div>
                                 </form>
 
