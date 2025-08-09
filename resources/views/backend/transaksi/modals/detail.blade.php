@@ -28,7 +28,7 @@
                         @foreach ($transaksi->details as $detail)
                             <tr>
                                 <td>
-                                    {{ \Carbon\Carbon::parse($detail->created_at)->translatedFormat('d M Y, H:i') }}
+                                    {{ \Carbon\Carbon::parse($detail->tanggal)->translatedFormat('d F Y') }}
                                 </td>
                                 <td>{{ $detail->berat }} {{ $detail->satuan }}</td>
                                 <td>{{ $detail->qty }}</td>

@@ -39,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/transaksi/{id}/cicil', [TransaksiController::class, 'cicil'])->name('transaksi.cicil');
     Route::post('/transaksi/{transaksiId}/detail', [TransaksiController::class, 'storeDetail'])->name('transaksi.detail.store');
+    Route::put('/transaksi/{transaksiId}/detail/update', [TransaksiController::class, 'updateDetail'])->name('transaksi.detail.update');
+
     Route::resource('pengeluaran', PengeluaranController::class); //pengeluaran
     Route::resource('slip', SlipController::class); //slip
 

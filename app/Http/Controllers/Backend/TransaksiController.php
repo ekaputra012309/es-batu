@@ -100,7 +100,7 @@ class TransaksiController extends Controller
             'details.*.qty' => 'required|integer|min:1',
             'details.*.harga' => 'required|numeric',
         ]);
-
+        // dd($request->all());
         $transaksi = Transaksi::findOrFail($transaksiId);
 
         $total = 0;
@@ -195,6 +195,64 @@ class TransaksiController extends Controller
             'datarole' => $role,
         );
         return view('backend.transaksi.edit', $data);
+    }
+
+    public function updateDetail(Request $request, $transaksiId)
+    {
+        $request->validate([
+            'details' => 'required|array',
+            'details.*.tanggal' => 'required|date',
+            'details.*.berat' => 'required|in:5,10,20',
+            'details.*.qty' => 'required|integer|min:1',
+            'details.*.harga' => 'required|numeric',
+        ]);
+        // dd($request->all());
+        $transaksi = Transaksi::findOrFail($transaksiId);
+        $transaksi->tanggal = $request->tanggal;
+        $transaksi->save();
+
+        $total = 0;
+
+        // Update or insert
+        foreach ($request->details as $detail) {
+            $subtotal = $detail['qty'] * $detail['harga'];
+            $total += $subtotal;
+
+            if (!empty($detail['id'])) {
+                $transaksi->details()->where('id', $detail['id'])->update([
+                    'berat' => $detail['berat'],
+                    'qty' => $detail['qty'],
+                    'harga' => $detail['harga'],
+                    'satuan' => $detail['satuan'] ?? 'Kg',
+                    'tanggal' => $detail['tanggal'],
+                ]);
+            } else {
+                    $transaksi->details()->create([
+                        'no_inv' => $transaksi->no_inv,
+                        'berat' => $detail['berat'],
+                        'qty' => $detail['qty'],
+                        'harga' => $detail['harga'],
+                        'satuan' => $detail['satuan'] ?? 'Kg',
+                        'user_id' => auth()->id(),
+                        'tanggal' => $detail['tanggal'],
+                    ]);
+            
+            }
+        }
+
+        // Delete removed items
+        foreach ($request->details as $detail) {
+            if (!empty($detail['_delete']) && !empty($detail['id'])) {
+                $transaksi->details()->where('id', $detail['id'])->delete();
+            }
+        }
+
+        // Recalculate total from all current details
+        $newTotal = $transaksi->details()->sum(\DB::raw('qty * harga'));
+        $transaksi->update(['total' => $newTotal]);
+
+        Alert::success('Success', 'Item Edit successfully.')->autoClose(2000);
+        return $this->redirectBackToDashboardIfNeeded();
     }
 
     public function update(Request $request, $id)

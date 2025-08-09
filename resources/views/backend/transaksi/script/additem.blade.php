@@ -1,7 +1,5 @@
 {{-- Script --}}
 <script>
-    const detailIndices = {}; // store indexes per transaksiId
-
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.add-detail-btn').forEach(button => {
             button.addEventListener('click', function() {
@@ -9,11 +7,10 @@
                 const container = document.getElementById(`detail-container-${transaksiId}`);
 
                 // Initialize index for this transaksi if not exists
-                if (!detailIndices[transaksiId]) {
-                    detailIndices[transaksiId] = 0;
+                if (!window.detailIndices[transaksiId]) {
+                    window.detailIndices[transaksiId] = 0;
                 }
-
-                const index = detailIndices[transaksiId];
+                const index = window.detailIndices[transaksiId];
 
                 const detailGroup = document.createElement('div');
                 detailGroup.className = 'detail-group row mb-2';
@@ -42,7 +39,7 @@
                 `;
 
                 container.appendChild(detailGroup);
-                detailIndices[transaksiId]++;
+                window.detailIndices[transaksiId]++;
             });
         });
 
