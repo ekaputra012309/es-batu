@@ -50,12 +50,12 @@ class SlipController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
-        // Slip::create($request->all());
+        // dd($request->all());
+        Slip::create($request->all());
 
-        // Alert::success('Success', 'slip created successfully.');
+        Alert::success('Success', 'slip created successfully.');
 
-        // return redirect()->route('slip.index');
+        return redirect()->route('slip.index');
     }
 
     public function edit(Slip $slip)
