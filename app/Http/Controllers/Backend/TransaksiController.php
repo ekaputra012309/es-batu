@@ -252,7 +252,12 @@ class TransaksiController extends Controller
         $transaksi->update(['total' => $newTotal]);
 
         Alert::success('Success', 'Item Edit successfully.')->autoClose(2000);
-        return $this->redirectBackToDashboardIfNeeded();
+        if ($request->asal === 'transaksi') {
+            return redirect()->route('transaksi.index');
+        } else {
+            return redirect()->route('dashboard');
+        }
+        
     }
 
     public function update(Request $request, $id)

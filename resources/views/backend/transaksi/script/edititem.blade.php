@@ -56,13 +56,14 @@
 
         // 3. Optional: remove row (new or existing)
         document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-detail-edit')) {
-                const row = e.target.closest('.detail-group');
+            const btn = e.target.closest('.remove-detail-edit');
+            if (btn) {
+                const row = btn.closest('.detail-group');
 
                 // Check if this row has an ID (existing data)
                 const idInput = row.querySelector('input[name*="[id]"]');
                 if (idInput) {
-                    // Mark for deletion by adding hidden _delete input
+                    // Mark for deletion
                     const namePrefix = idInput.name.replace('[id]', '');
                     const deleteInput = document.createElement('input');
                     deleteInput.type = 'hidden';
@@ -70,13 +71,14 @@
                     deleteInput.value = '1';
                     row.appendChild(deleteInput);
 
-                    // Optional: visually hide the row
+                    // Hide instead of removing
                     row.style.display = 'none';
                 } else {
-                    // It's a new unsaved item — just remove it
+                    // Unsaved new row — remove immediately
                     row.remove();
                 }
             }
         });
+
     });
 </script>

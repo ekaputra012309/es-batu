@@ -14,7 +14,7 @@
                     @auth
                         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                     @endauth
-                    <input type="hidden" name="asal" value="transaksi">
+                    <input type="hidden" name="asal" value="dashboard">
 
                     <div id="detail-containerEdit-{{ $transaksi->id }}">
                         @foreach ($transaksi->details as $index => $detail)

@@ -197,7 +197,7 @@
                                             'transaksi' => $transaksi,
                                         ])
 
-                                        @include('backend.transaksi.modals.edititem', [
+                                        @include('backend.transaksi.modals.d_edititem', [
                                             'transaksi' => $transaksi,
                                         ])
                                     @endif
