@@ -8,6 +8,7 @@ use App\Http\Controllers\Backend\PrivilageController;
 use App\Http\Controllers\Backend\TransaksiController;
 use App\Http\Controllers\Backend\PengeluaranController;
 use App\Http\Controllers\Backend\SlipController;
+use App\Http\Controllers\Backend\UtangController;
 
 // Route::get('/', function () {
 //     return ['Laravel' => app()->version()];
@@ -44,6 +45,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pengeluaran', PengeluaranController::class); //pengeluaran
     Route::resource('slip', SlipController::class); //slip
 
+    Route::post('/utang/{transaksiId}', [UtangController::class, 'storeUtang'])->name('utang.besar.store');
+    Route::post('/cicil/store', [UtangController::class, 'storeCicilUtang'])->name('cicil.utang.store');
+    Route::post('/utang/{id}/cicil', [UtangController::class, 'cicilUtang'])->name('utang.cicil');
 });
 
 require __DIR__ . '/auth.php';

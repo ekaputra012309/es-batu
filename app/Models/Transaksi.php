@@ -40,4 +40,10 @@ class Transaksi extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function utang()
+    {
+        return $this->hasOne(UtangBesar::class, 'table_transaksi_id');
+    }
+
 }

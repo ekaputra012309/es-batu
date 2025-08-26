@@ -10,6 +10,8 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Bayar;
 use App\Models\PengeluaranHeader;
+use App\Models\UtangBesar;
+use App\Models\CicilUtang;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
@@ -59,7 +61,7 @@ class TransaksiController extends Controller
 
     public function index()
     {
-        $transaksi = Transaksi::with('user', 'details', 'bayar')
+        $transaksi = Transaksi::with('user', 'details', 'bayar', 'utang', 'utang.cicilans')
             ->orderBy('created_at', 'desc')
             ->get();
         $userId = auth()->user()->id;
@@ -69,6 +71,7 @@ class TransaksiController extends Controller
             'datatransaksi' => $transaksi,
             'no_inv' => $no_inv,
         );
+        // dd($data);
         $title = 'Delete Transaksi!';
         $text = "Are you sure you want to delete?";
         confirmDelete($title, $text);

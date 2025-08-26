@@ -1,0 +1,98 @@
+<!-- Modal Cicil -->
+<div class="modal fade" id="cicilUtangModal{{ $utang->id }}" tabindex="-1" role="dialog"
+    aria-labelledby="cicilUtangModalLabel{{ $utang->id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form action="{{ route('utang.cicil', $utang->id) }}" method="POST">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bayar Cicil Hutang Besar
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Total Transaksi: <strong>Rp
+                            {{ number_format($utang->nominal, 0, ',', '.') }}</strong>
+                    </p>
+                    <p>Total Dibayar: <strong>Rp
+                            {{ number_format($totalBayarUtang, 0, ',', '.') }}</strong>
+                    </p>
+                    <p>Sisa Pembayaran: <strong class="text-danger">Rp
+                            {{ number_format($sisaUtang, 0, ',', '.') }}</strong></p>
+
+                    <div class="form-group">
+                        <label for="nominal">Nominal Pembayaran</label>
+                        <input type="text" name="nominal_display" class="form-control"
+                            id="nominalFormatted{{ $utang->id }}" required>
+                        <input type="hidden" name="nominal" id="nominalRaw{{ $utang->id }}"
+                            data-sisa="{{ $sisaUtang }}">
+                        <div class="invalid-feedback" id="errorNominal{{ $utang->id }}" style="display: none;">
+                            Nominal melebihi sisa pembayaran
+                        </div>
+                        {{-- <input type="number" name="nominal" class="form-control" required max="{{ $sisa }}"> --}}
+                        <small class="text-muted">Maksimum: Rp
+                            {{ number_format($sisaUtang, 0, ',', '.') }}</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Bayar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalId = {{ $utang->id }};
+        const formattedInput = document.getElementById(`nominalFormatted${modalId}`);
+        const rawInput = document.getElementById(`nominalRaw${modalId}`);
+
+        if (formattedInput && rawInput) {
+            formattedInput.addEventListener('input', function() {
+                let value = this.value.replace(/\./g, '').replace(/[^\d]/g, '');
+                if (!value) value = '0';
+
+                rawInput.value = value;
+
+                // Format with dot as thousand separator
+                this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            });
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalId = {{ $utang->id }};
+        const formattedInput = document.getElementById(`nominalFormatted${modalId}`);
+        const rawInput = document.getElementById(`nominalRaw${modalId}`);
+        const errorDiv = document.getElementById(`errorNominal${modalId}`);
+        const form = document.querySelector(`#cicilModal{{ $utang->id }} form`);
+
+        if (formattedInput && rawInput) {
+            formattedInput.addEventListener('input', function() {
+                let value = this.value.replace(/\./g, '').replace(/[^\d]/g, '');
+                if (!value) value = '0';
+                rawInput.value = value;
+                this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                errorDiv.style.display = 'none'; // hide on new input
+                rawInput.classList.remove('is-invalid');
+            });
+        }
+
+        form?.addEventListener('submit', function(e) {
+            const sisa = parseInt(rawInput.dataset.sisa);
+            const nominal = parseInt(rawInput.value || '0');
+
+            if (nominal > sisa) {
+                e.preventDefault();
+                rawInput.classList.add('is-invalid');
+                errorDiv.style.display = 'block';
+            }
+        });
+    });
+</script>

@@ -74,6 +74,80 @@
                     </tbody>
                 </table>
 
+                <hr>
+                <h6>Hutang Besar</h6>
+                @if ($transaksi->utang)
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nominal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    {{ \Carbon\Carbon::parse($transaksi->utang->tanggal)->translatedFormat('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($transaksi->utang->created_at)->translatedFormat(' H:i') }}
+                                </td>
+                                <td>Rp {{ number_format($transaksi->utang->nominal, 0, ',', '.') }}</td>
+                                <td>
+                                    @if ($transaksi->utang->status == 1)
+                                        <span class="text-success">Lunas</span>
+                                    @else
+                                        <span class="text-danger">Belum Lunas</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    @if ($transaksi->utang->cicilans->isNotEmpty())
+                        <h6>Rincian Cicilan Hutang</h6>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Nominal</th>
+                                    <th>User</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($transaksi->utang->cicilans as $cicil)
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($cicil->tanggal ?? $cicil->created_at)->translatedFormat('d M Y H:i') }}
+                                        </td>
+                                        <td>Rp {{ number_format($cicil->nominal, 0, ',', '.') }}</td>
+                                        <td>{{ $cicil->user->name ?? '-' }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="font-weight-bold">
+                                    <td>Total Cicilan</td>
+                                    <td colspan="2">Rp
+                                        {{ number_format($transaksi->utang->cicilans->sum('nominal'), 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                                @if ($transaksi->utang->status == 0)
+                                    <tr class="text-danger font-weight-bold">
+                                        <td>Sisa</td>
+                                        <td colspan="2">
+                                            Rp
+                                            {{ number_format($transaksi->utang->nominal - $transaksi->utang->cicilans->sum('nominal'), 0, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                @else
+                                    <tr class="text-success font-weight-bold">
+                                        <td colspan="3" class="text-center">Hutang Lunas</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    @endif
+                @else
+                    <p class="text-muted small">Tidak ada hutang untuk transaksi ini.</p>
+                @endif
+
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-dismiss="modal">Tutup</button>

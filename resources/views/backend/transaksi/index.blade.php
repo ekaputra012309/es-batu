@@ -134,7 +134,8 @@
                                             <th>No Invoice</th>
                                             <th>Tanggal Transaksi</th>
                                             <th>Total</th>
-                                            <th>Status</th>
+                                            <th>Status Tagihan</th>
+                                            <th>Status Hutang</th>
                                             <th>User</th>
                                         </tr>
                                     </thead>
@@ -187,6 +188,26 @@
                                                             <i class="fas fa-edit"></i> Edit Item
                                                         </button>
                                                     @endif
+
+                                                    {{-- button hutang --}}
+                                                    {{-- Belum ada utang → boleh tambah utang --}}
+                                                    @if (!$transaksi->utang)
+                                                        <br>
+                                                        <button class="btn btn-xs btn-success" data-toggle="modal"
+                                                            data-target="#addUtangModal{{ $transaksi->id }}">
+                                                            <i class="fas fa-plus"></i> Tambah Utang Besar
+                                                        </button>
+                                                    @endif
+
+                                                    {{-- Sudah ada utang dan masih status 0 (belum lunas) → boleh cicil --}}
+                                                    @if ($transaksi->utang && $transaksi->utang->status == 0)
+                                                        <br>
+                                                        <button class="btn btn-xs btn-primary" data-toggle="modal"
+                                                            data-target="#cicilUtangModal{{ $transaksi->id }}">
+                                                            <i class="fas fa-hashtag"></i> Cicil Utang Besar
+                                                        </button>
+                                                    @endif
+
                                                 </td>
                                                 <td>
                                                     {{ $transaksi->no_inv }}
@@ -245,6 +266,38 @@
                                                         </div>
                                                     @endforeach
                                                 </td>
+                                                <td>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        {{-- Tampilkan status hanya jika ada utang --}}
+                                                        @if ($transaksi->utang)
+                                                            @if ($transaksi->utang->status == 1)
+                                                                <span class="badge badge-success">Lunas</span>
+                                                            @else
+                                                                <span class="badge badge-danger">Belum Lunas</span>
+                                                            @endif
+                                                        @endif
+                                                    </div>
+                                                    @if (optional($transaksi->utang)->nominal)
+                                                        <div class="mt-1 small text-muted d-flex justify-content-between">
+                                                            <span>Rp
+                                                                {{ number_format(optional($transaksi->utang)->nominal, 0, ',', '.') }}</span>
+                                                            <span>{{ \Carbon\Carbon::parse(optional($transaksi->utang)->created_at)->translatedFormat('d M ,H:i') }}</span>
+                                                        </div>
+                                                    @endif
+
+                                                    @if ($transaksi->utang?->cicilans->isNotEmpty())
+                                                        <span class="muted small">Rincian Cicilan Hutang</span>
+                                                    @endif
+
+                                                    @foreach (optional($transaksi->utang)->cicilans ?? [] as $cicil)
+                                                        <div class="mt-1 small text-muted d-flex justify-content-between">
+                                                            <span>Rp
+                                                                {{ number_format($cicil->nominal, 0, ',', '.') }}</span>
+                                                            <span>{{ \Carbon\Carbon::parse($cicil->created_at)->translatedFormat('d M ,H:i') }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </td>
+
                                                 <td>{{ $transaksi->user->name }}</td>
                                             </tr>
                                         @endforeach
@@ -268,6 +321,21 @@
 
                                         @include('backend.transaksi.modals.edititem', [
                                             'transaksi' => $transaksi,
+                                        ])
+                                    @endif
+                                    @include('backend.transaksi.modals.addutang', [
+                                        'transaksi' => $transaksi,
+                                    ])
+
+                                    @if ($transaksi->utang)
+                                        @php
+                                            $totalBayarUtang =
+                                                optional($transaksi->utang->cicilans)->sum('nominal') ?? 0;
+                                            $sisaUtang = $transaksi->utang->nominal - $totalBayarUtang;
+                                        @endphp
+
+                                        @include('backend.transaksi.modals.cicilutang2', [
+                                            'utang' => $transaksi->utang,
                                         ])
                                     @endif
                                 @endforeach
