@@ -71,7 +71,7 @@
         const formattedInput = document.getElementById(`nominalFormatted${modalId}`);
         const rawInput = document.getElementById(`nominalRaw${modalId}`);
         const errorDiv = document.getElementById(`errorNominal${modalId}`);
-        const form = document.querySelector(`#cicilModal{{ $utang->id }} form`);
+        const form = document.querySelector(`#cicilUtangModal{{ $utang->id }} form`);
 
         if (formattedInput && rawInput) {
             formattedInput.addEventListener('input', function() {

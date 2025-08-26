@@ -203,7 +203,7 @@
                                                     @if ($transaksi->utang && $transaksi->utang->status == 0)
                                                         <br>
                                                         <button class="btn btn-xs btn-primary" data-toggle="modal"
-                                                            data-target="#cicilUtangModal{{ $transaksi->id }}">
+                                                            data-target="#cicilUtangModal{{ $transaksi->utang->id }}">
                                                             <i class="fas fa-hashtag"></i> Cicil Utang Besar
                                                         </button>
                                                     @endif
