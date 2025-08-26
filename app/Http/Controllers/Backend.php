@@ -34,11 +34,16 @@ class Backend extends Controller
         $monthlyIncome = Bayar::whereBetween('created_at', [$monthlyStart, $today->endOfDay()])->sum('nominal');
         $yearlyIncome = Bayar::whereBetween('created_at', [$yearlyStart, $today->endOfDay()])->sum('nominal');
 
-        $transaksi = Transaksi::with('user', 'details', 'bayar')
-                    ->where('status', '1')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-
+        $transaksi = Transaksi::with(['user', 'details', 'bayar', 'utang', 'utang.cicilans'])
+                ->where(function ($q) {
+                    $q->where('status', '1') // enum → string
+                    ->orWhereHas('utang', function ($sub) {
+                        $sub->where('status', '0'); // enum → string
+                    });
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
+    
         $data = [
             'title' => 'Dashboard | ',
             'todayIncome' => $todayIncome,
