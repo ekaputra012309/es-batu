@@ -295,7 +295,7 @@
                 "autoWidth": false, // usually better to disable this for scroll
                 "scrollCollapse": true,
                 "paging": true,
-                "pageLength": 5,
+                "pageLength": 10,
                 // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
         </script>
