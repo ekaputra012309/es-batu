@@ -76,6 +76,7 @@
         $gajiKotor = $slip->gp + $slip->inssentif + $slip->bonus + $slip->uang_makan;
         $potongan = $slip->pot_uang_makan + $slip->pot_kasbon;
         $totalBersih = $gajiKotor - $potongan;
+        $hutangA = $slip->hutang - $slip->pot_kasbon;
     @endphp
 
     <table>
@@ -115,7 +116,7 @@
 
         <tr>
             <td>Sisa Hutang/Kasbon</td>
-            <td class="price">- {{ $rupiah($slip->hutang) }}</td>
+            <td class="price">- {{ $rupiah($hutangA) }}</td>
         </tr>
     </table>
 </body>
