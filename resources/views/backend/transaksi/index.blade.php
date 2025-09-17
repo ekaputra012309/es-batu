@@ -263,6 +263,19 @@
                                                             <span>Rp
                                                                 {{ number_format($byr->nominal, 0, ',', '.') }}</span>
                                                             <span>{{ \Carbon\Carbon::parse($byr->created_at)->translatedFormat('d M ,H:i') }}</span>
+                                                            @if (in_array($role, ['superadmin', 'admin']))
+                                                                <form id="delete-form-{{ $byr->id }}"
+                                                                    action="{{ route('transaksi.hapuscicilan', $byr->id) }}"
+                                                                    method="POST" style="display:inline;">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="button"
+                                                                        class="btn btn-xs btn-outline-danger btn-delete"
+                                                                        data-id="{{ $byr->id }}">
+                                                                        <i class="fas fa-times"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         </div>
                                                     @endforeach
                                                 </td>
@@ -364,6 +377,27 @@
                 "paging": true,
                 // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+        </script>
+
+        <script>
+            $(document).on('click', '.btn-delete', function() {
+                let id = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Yakin hapus cicilan ini?',
+                    text: "Data tidak bisa dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#delete-form-' + id).submit();
+                    }
+                });
+            });
         </script>
 
         @include('backend.transaksi.script.transaksi')

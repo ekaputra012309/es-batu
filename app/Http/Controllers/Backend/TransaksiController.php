@@ -391,4 +391,13 @@ class TransaksiController extends Controller
         Alert::success('Berhasil', 'Pembayaran cicilan berhasil ditambahkan');
         return $this->redirectBackToDashboardIfNeeded();
     }
+
+    public function hapusCicil($id)
+    {
+        // Delete related Bayar
+        Bayar::findOrFail($id)->delete();
+
+        Alert::success('Success', 'Cicilan deleted successfully.');
+        return redirect()->route('transaksi.index');
+    }
 }
