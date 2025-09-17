@@ -97,7 +97,9 @@
                 </tr>
             @endforeach
             <tr class="total-row">
-                <td colspan="5" style="text-align: right;"><strong>Total</strong></td>
+                <td colspan="3" style="text-align: right;"><strong>Total</strong></td>
+                <td>{{ $transaksi->details->sum('qty') }}</td>
+                <td></td>
                 <td class="price"><strong>Rp {{ number_format($transaksi->total, 0, ',', '.') }}</strong></td>
             </tr>
         </tbody>
