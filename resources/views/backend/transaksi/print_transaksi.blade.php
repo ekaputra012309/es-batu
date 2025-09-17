@@ -60,16 +60,12 @@
         <tr>
             <th>No Invoice</th>
             <td>: {{ $transaksi->no_inv }}</td>
-        </tr>
-        <tr>
-            <th>Tanggal</th>
-            <td>: {{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d/m/Y H:i') }}</td>
-        </tr>
-        <tr>
             <th>User</th>
             <td>: {{ $transaksi->user->name }}</td>
         </tr>
         <tr>
+            <th>Tanggal</th>
+            <td>: {{ \Carbon\Carbon::parse($transaksi->created_at)->translatedFormat('d/m/Y H:i') }}</td>
             <th>Customer</th>
             <td>: {{ $transaksi->customer ?? '' }}</td>
         </tr>
@@ -246,8 +242,7 @@
     </table>
 
     <div class="footer">
-        <p>Terima Kasih!</p>
-        <p>Silakan Kunjungi Kami Lagi!</p>
+        <p>Terima Kasih!, Silakan Kunjungi Kami Lagi!</p>
     </div>
 </body>
 
