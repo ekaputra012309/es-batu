@@ -105,65 +105,63 @@
         </tbody>
     </table>
     <h3>Detail Pembayaran</h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Tanggal Bayar</th>
-                <th>Nominal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php
-                $totalBayar = 0;
-            @endphp
-            @forelse ($transaksi->bayar as $i => $bayar)
-                @php
-                    $totalBayar += $bayar->nominal;
-                @endphp
+    @if ($transaksi->bayar->count() > 0)
+        <table border="1">
+            <thead>
                 <tr>
-                    <td>{{ $i + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($bayar->created_at)->translatedFormat('d F Y H:i') }}</td>
-                    <td class="price">Rp {{ number_format($bayar->nominal, 0, ',', '.') }}</td>
+                    <th>No</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Nominal</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="3" style="text-align: center;">Belum ada pembayaran</td>
-                </tr>
-            @endforelse
-            <tr class="total-row">
-                <td colspan="2" style="text-align: right;"><strong>Total Tagihan</strong></td>
-                <td class="price"><strong>Rp {{ number_format($transaksi->total, 0, ',', '.') }}</strong></td>
-            </tr>
-            <tr class="total-row">
-                <td colspan="2" style="text-align: right;"><strong>Total Dibayar</strong></td>
-                <td class="price"><strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></td>
-            </tr>
-            @if ($transaksi->status != 0)
+            </thead>
+            <tbody>
+                @php $totalBayar = 0; @endphp
+                @foreach ($transaksi->bayar as $i => $bayar)
+                    @php $totalBayar += $bayar->nominal; @endphp
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ \Carbon\Carbon::parse($bayar->created_at)->translatedFormat('d F Y H:i') }}</td>
+                        <td class="price">Rp {{ number_format($bayar->nominal, 0, ',', '.') }}</td>
+                    </tr>
+                @endforeach
                 <tr class="total-row">
-                    <td colspan="2" style="text-align: right;">Sisa Pembayaran</td>
-                    <td class="price text-danger">Rp {{ number_format($transaksi->total - $totalBayar, 0, ',', '.') }}
-                    </td>
+                    <td colspan="2" style="text-align: right;"><strong>Total Tagihan</strong></td>
+                    <td class="price"><strong>Rp {{ number_format($transaksi->total, 0, ',', '.') }}</strong></td>
                 </tr>
-            @else
-                <tr>
-                    <td colspan="3" style="text-align: center;"><strong>Transaksi sudah lunas</strong></td>
+                <tr class="total-row">
+                    <td colspan="2" style="text-align: right;"><strong>Total Dibayar</strong></td>
+                    <td class="price"><strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong></td>
                 </tr>
-            @endif
-        </tbody>
-    </table>
+                @if ($transaksi->status != 0)
+                    <tr class="total-row">
+                        <td colspan="2" style="text-align: right;">Sisa Pembayaran</td>
+                        <td class="price text-danger">
+                            Rp {{ number_format($transaksi->total - $totalBayar, 0, ',', '.') }}
+                        </td>
+                    </tr>
+                @else
+                    <tr>
+                        <td colspan="3" style="text-align: center;"><strong>Transaksi sudah lunas</strong></td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    @else
+        <p style="text-align:center;">Belum ada pembayaran</p>
+    @endif
+
 
     <h3>Detail Utang</h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Total Hutang</th>
-                <th>Total Cicilan</th>
-                <th>Sisa Hutang</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if ($transaksi->utang)
+    @if ($transaksi->utang)
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Total Hutang</th>
+                    <th>Total Cicilan</th>
+                    <th>Sisa Hutang</th>
+                </tr>
+            </thead>
+            <tbody>
                 @php
                     $totalCicil = $transaksi->utang->cicilans?->sum('nominal') ?? 0;
                     $sisaUtang = $transaksi->utang->nominal - $totalCicil;
@@ -175,28 +173,25 @@
                         Rp {{ number_format($sisaUtang, 0, ',', '.') }}
                     </td>
                 </tr>
-            @else
-                <tr>
-                    <td colspan="3" style="text-align:center;">Tidak ada data utang</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    @else
+        <p style="text-align:center;">Tidak ada data utang</p>
+    @endif
+
 
     <h3>Detail Cicilan</h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Tanggal Cicil</th>
-                <th>Nominal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if ($transaksi->utang && $transaksi->utang->cicilans && $transaksi->utang->cicilans->count() > 0)
-                @php
-                    $totalCicil = 0;
-                @endphp
+    @if ($transaksi->utang && $transaksi->utang->cicilans->count() > 0)
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Tanggal Cicil</th>
+                    <th>Nominal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $totalCicil = 0; @endphp
                 @foreach ($transaksi->utang->cicilans as $i => $cicil)
                     @php $totalCicil += $cicil->nominal; @endphp
                     <tr>
@@ -214,34 +209,27 @@
                     <td colspan="2" style="text-align:right;"><strong>Total Cicilan</strong></td>
                     <td class="price"><strong>Rp {{ number_format($totalCicil, 0, ',', '.') }}</strong></td>
                 </tr>
-                @if ($transaksi->utang)
-                    @php
-                        $totalCicil = $transaksi->utang->cicilans->sum('nominal') ?? 0;
-                        $sisaUtang = $transaksi->utang->nominal - $totalCicil;
-                    @endphp
-
-                    @if ($sisaUtang > 0)
-                        <tr class="total-row">
-                            <td colspan="2" style="text-align:right;">Sisa Hutang</td>
-                            <td class="price text-danger">
-                                Rp {{ number_format($sisaUtang, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    @else
-                        <tr>
-                            <td colspan="3" style="text-align:center;">
-                                <strong>Hutang sudah lunas</strong>
-                            </td>
-                        </tr>
-                    @endif
+                @php
+                    $sisaUtang = $transaksi->utang->nominal - $totalCicil;
+                @endphp
+                @if ($sisaUtang > 0)
+                    <tr class="total-row">
+                        <td colspan="2" style="text-align:right;">Sisa Hutang</td>
+                        <td class="price text-danger">
+                            Rp {{ number_format($sisaUtang, 0, ',', '.') }}
+                        </td>
+                    </tr>
+                @else
+                    <tr>
+                        <td colspan="3" style="text-align:center;"><strong>Hutang sudah lunas</strong></td>
+                    </tr>
                 @endif
-            @else
-                <tr>
-                    <td colspan="3" style="text-align:center;">Belum ada cicilan</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    @else
+        <p style="text-align:center;">Belum ada cicilan</p>
+    @endif
+
 
     <div class="footer">
         <p>Terima Kasih!, Silakan Kunjungi Kami Lagi!</p>
