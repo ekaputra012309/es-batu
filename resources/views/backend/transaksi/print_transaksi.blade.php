@@ -104,8 +104,9 @@
             </tr>
         </tbody>
     </table>
-    <h3>Detail Pembayaran</h3>
+
     @if ($transaksi->bayar->count() > 0)
+        <h3>Detail Pembayaran</h3>
         <table border="1">
             <thead>
                 <tr>
@@ -147,12 +148,11 @@
             </tbody>
         </table>
     @else
-        <p style="text-align:center;">Belum ada pembayaran</p>
+        <p style="text-align:left;">Belum ada pembayaran</p>
     @endif
 
-
-    <h3>Detail Utang</h3>
     @if ($transaksi->utang)
+        <h3>Detail Utang</h3>
         <table border="1">
             <thead>
                 <tr>
@@ -179,9 +179,8 @@
         <p style="text-align:center;">Tidak ada data utang</p>
     @endif
 
-
-    <h3>Detail Cicilan</h3>
     @if ($transaksi->utang && $transaksi->utang->cicilans->count() > 0)
+        <h3>Detail Cicilan</h3>
         <table border="1">
             <thead>
                 <tr>
@@ -229,7 +228,6 @@
     @else
         <p style="text-align:center;">Belum ada cicilan</p>
     @endif
-
 
     <div class="footer">
         <p>Terima Kasih!, Silakan Kunjungi Kami Lagi!</p>
