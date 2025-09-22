@@ -336,8 +336,8 @@ class TransaksiController extends Controller
             $data = [
                 'title' => 'Laporan Transaksi | ',
                 'datatransaksi' => Transaksi::with('user', 'details', 'bayar')
-                    ->whereBetween('tanggal', [$startDateTime, $endDateTime])
-                    ->orderBy('tanggal', 'desc')
+                    ->whereBetween('created_at', [$startDateTime, $endDateTime])
+                    ->orderBy('created_at', 'desc')
                     ->get(),
             ];
         } else {
