@@ -35,12 +35,22 @@ class Backend extends Controller
         $endOfMonth   = \Carbon\Carbon::parse($bulan . '-01')->endOfMonth();
 
         // Income
-        // $monthlyIncome = Bayar::whereHas('transaksibayar', function ($q) use ($startOfMonth, $endOfMonth) {
-        //     $q->whereBetween('tanggal', [$startOfMonth, $endOfMonth]);
-        // })->sum('nominal');
-        $monthlyIncome = Bayar::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-        ->sum('nominal');
+        // $monthlyIncome = Bayar::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        // ->sum('nominal');
 
+        $transaksi = Transaksi::with('user', 'details', 'bayar')
+                    ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+        $totalTransaksi = $transaksi->sum('total');
+
+        $kurangBayar = $transaksi->sum(function ($trx) {
+            return $trx->total - $trx->bayar->sum('nominal');
+        });
+        
+        $monthlyIncome = $totalTransaksi - $kurangBayar;
+                    
         // Pengeluaran
         $monthlyExpense = PengeluaranDetail::whereHas('header', function ($query) use ($startOfMonth, $endOfMonth) {
             $query->whereBetween('tanggal', [$startOfMonth, $endOfMonth]);
