@@ -6,6 +6,8 @@ use App\Models\Booking;
 use App\Models\Bayar;
 use App\Models\Transaksi;
 use App\Models\PermintaanModel;
+use App\Models\PengeluaranHeader;
+use App\Models\PengeluaranDetail;
 use App\Models\CompanyProfile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -23,35 +25,47 @@ class Backend extends Controller
         return view('backend.login', $data);
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $today = Carbon::today();
-        $monthlyStart = $today->copy()->startOfMonth();
-        $yearlyStart = $today->copy()->startOfYear();
-        
-        // Real income from 'bayars' table (actual payments)
-        $todayIncome = Bayar::whereDate('created_at', $today)->sum('nominal');
-        $monthlyIncome = Bayar::whereBetween('created_at', [$monthlyStart, $today->endOfDay()])->sum('nominal');
-        $yearlyIncome = Bayar::whereBetween('created_at', [$yearlyStart, $today->endOfDay()])->sum('nominal');
+        // default: bulan ini
+        $bulan = $request->input('bulan', now()->format('Y-m')); 
 
+        // parsing ke Carbon (awal & akhir bulan)
+        $startOfMonth = \Carbon\Carbon::parse($bulan . '-01')->startOfMonth();
+        $endOfMonth   = \Carbon\Carbon::parse($bulan . '-01')->endOfMonth();
+
+        // Income
+        // $monthlyIncome = Bayar::whereHas('transaksibayar', function ($q) use ($startOfMonth, $endOfMonth) {
+        //     $q->whereBetween('tanggal', [$startOfMonth, $endOfMonth]);
+        // })->sum('nominal');
+        $monthlyIncome = Bayar::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ->sum('nominal');
+
+        // Pengeluaran
+        $monthlyExpense = PengeluaranDetail::whereHas('header', function ($query) use ($startOfMonth, $endOfMonth) {
+            $query->whereBetween('tanggal', [$startOfMonth, $endOfMonth]);
+        })->sum('nominal');
+
+        // Transaksi belum lunas
         $transaksi = Transaksi::with(['user', 'details', 'bayar', 'utang', 'utang.cicilans'])
-                ->where(function ($q) {
-                    $q->where('status', '1') // enum → string
+            ->where(function ($q) {
+                $q->where('status', '1')
                     ->orWhereHas('utang', function ($sub) {
-                        $sub->where('status', '0'); // enum → string
+                        $sub->where('status', '0');
                     });
-                })
-                ->orderBy('created_at', 'desc')
-                ->get();
-    
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $data = [
-            'title' => 'Dashboard | ',
-            'todayIncome' => $todayIncome,
+            'title'         => 'Dashboard | ',
             'monthlyIncome' => $monthlyIncome,
-            'yearlyIncome' => $yearlyIncome,
+            'monthlyExpense'=> $monthlyExpense,
+            'pendapatan'    => $monthlyIncome - $monthlyExpense,
             'datatransaksi' => $transaksi,
+            'bulan'         => $bulan, // supaya bisa dipakai di view
         ];
-        
+        // dd($data);
         return view('backend.dashboard', $data);
     }
 

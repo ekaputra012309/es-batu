@@ -11,6 +11,10 @@
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <!-- You can add breadcrumb links here if needed -->
+                            <form method="GET" action="{{ route('dashboard') }}">
+                                <input type="month" class="form-control" name="bulan"
+                                    value="{{ $bulan ?? now()->format('Y-m') }}" onchange="this.form.submit()">
+                            </form>
                         </ol>
                     </div>
                 </div>
@@ -19,63 +23,42 @@
 
         <section class="content">
             <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <!-- Daily Income Card -->
-                        <div class="card card-success">
-                            <div class="card-header">
-                                <h3 class="card-title">Pendapatan per Hari</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="info-box">
-                                    <span class="info-box-icon"><i class="fas fa-calendar-day"></i></span>
-                                    <div class="info-box-content">
-                                        <span class="info-box-number">
-                                            <h3 class="font-weight-bold">Rp {{ number_format($todayIncome, 0, ',', '.') }}
-                                            </h3>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+
+                <div class="row mt-4">
+                    <!-- Saldo Card -->
+                    <div class="col-lg-4 mb-3">
+                        <div class="card card-flat bg-warm-blue text-dark p-4 h-100 text-left">
+                            <i class="fas fa-wallet fa-3x mb-3"></i>
+                            <small class="d-block">Pendapatan
+                            </small>
+                            <h1 class="fw-bold mb-0">
+                                {{ number_format($pendapatan, 0, ',', '.') }}
+                            </h1>
                         </div>
                     </div>
 
-                    <div class="col-lg-4">
-                        <!-- Monthly Income Card -->
-                        <div class="card card-info">
-                            <div class="card-header">
-                                <h3 class="card-title">Pendapatan per Bulan</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="info-box">
-                                    <span class="info-box-icon"><i class="fas fa-calendar-week"></i></span>
-                                    <div class="info-box-content">
-                                        <span class="info-box-number">
-                                            <h3 class="font-weight-bold">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}
-                                            </h3>
-                                        </span>
-                                    </div>
+                    <!-- Pemasukan & Pengeluaran Card -->
+                    <div class="col-lg-4 mb-3">
+                        <div class="card card-flat bg-light p-4 h-100">
+                            <!-- Pemasukan -->
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <div>
+                                    <small class="text-muted d-block">Pemasukan</small>
+                                    <h3 class="fw-bold mb-0">
+                                        {{ number_format($monthlyIncome, 0, ',', '.') }}
+                                    </h3>
                                 </div>
+                                <i class="fas fa-arrow-down fa-2x text-success"></i>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4">
-                        <!-- Yearly Income Card -->
-                        <div class="card card-danger">
-                            <div class="card-header">
-                                <h3 class="card-title">Pendapatan per Tahun</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="info-box">
-                                    <span class="info-box-icon"><i class="fas fa-calendar-alt"></i></span>
-                                    <div class="info-box-content">
-                                        <span class="info-box-number">
-                                            <h3 class="font-weight-bold">Rp {{ number_format($yearlyIncome, 0, ',', '.') }}
-                                            </h3>
-                                        </span>
-                                    </div>
+                            <!-- Pengeluaran -->
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <small class="text-muted d-block">Pengeluaran</small>
+                                    <h3 class="fw-bold mb-0">
+                                        {{ number_format($monthlyExpense, 0, ',', '.') }}
+                                    </h3>
                                 </div>
+                                <i class="fas fa-arrow-up fa-2x text-danger"></i>
                             </div>
                         </div>
                     </div>
